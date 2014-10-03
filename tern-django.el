@@ -24,7 +24,7 @@
 
 ;; You can install this package from Melpa:
 ;;
-;;     M-x package-install RET relative-buffers RET
+;;     M-x package-install RET tern-django RET
 
 ;;; Commentary:
 
