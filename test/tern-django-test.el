@@ -10,7 +10,7 @@
 (ert-deftest test-tern-django-run-command ()
   (let ((tenr-django-script "-V"))
     (tern-django)
-    (should (processp tern-django-process))))
+    (should (tern-django-running-p))))
 
 (provide 'tern-django-test)
 

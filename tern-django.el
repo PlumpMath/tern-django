@@ -85,6 +85,11 @@
         (f-join it bin python)
       python)))
 
+(defun tern-django-running-p ()
+  "Check if `tern-django' process is running."
+  (and tern-django-process
+       (process-live-p tern-django-process)))
+
 ;;;###autoload
 (defun tern-django ()
   "Create tern projects for django applications."
