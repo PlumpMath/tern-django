@@ -5,7 +5,7 @@
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/tern-django
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "24") (tern "0.0.1"))
+;; Package-Requires: ((emacs "24") (tern "0.0.1") (f "0.17.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -64,6 +64,35 @@
 ;; projects and tern ports files in you VCS.
 
 ;;; Code:
+
+(require 'python)
+(require 'f)
+
+(defvar tern-django-directory (f-dirname load-file-name)
+  "Directory contain `tern-django' package.")
+
+(defvar tern-django-script (f-join tern-django-directory "tern_django.py")
+  "Script path to read django settings.")
+
+(defvar tern-django-process nil
+  "Currently running `tern-django' process.")
+
+(defun tern-django-python ()
+  "Detect python executable."
+  (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
+        (bin (if (eq system-type 'windows-nt) "Scripts" "bin")))
+    (--if-let python-shell-virtualenv-path
+        (f-join it bin python)
+      python)))
+
+;;;###autoload
+(defun tern-django ()
+  "Create tern projects for django applications."
+  (setq tern-django-process
+        (start-process "tern-django"
+                       "*tern-django*"
+                       (tern-django-python)
+                       tern-django-script)))
 
 (provide 'tern-django)
 
