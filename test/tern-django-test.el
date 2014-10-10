@@ -26,6 +26,16 @@
     (wait-for-tern-django)
     (should (equal "*tern-django*" (buffer-name)))))
 
+(ert-deftest test-tern-django-clean-output-buffer-for-each-run ()
+  "Check that each `tern-django' script runs buffer contain its own output only."
+  (let ((tern-django-script "-V"))
+    (dotimes (i 2)
+      (tern-django)
+      (wait-for-tern-django))
+    (with-current-buffer tern-django-buffer
+      (should (equal (buffer-size)
+                     (length "Python 3.4.0\n"))))))
+
 (provide 'tern-django-test)
 
 ;;; tern-django-test.el ends here

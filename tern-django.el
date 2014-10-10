@@ -103,6 +103,9 @@ EVENT argument is ignored."
 (defun tern-django-bootstrap ()
   "Start `tern-django' python script."
   (let ((default-directory tern-django-directory))
+    (with-current-buffer
+        (get-buffer-create tern-django-buffer)
+      (erase-buffer))
     (setq tern-django-process
           (start-process "tern-django"
                          tern-django-buffer
