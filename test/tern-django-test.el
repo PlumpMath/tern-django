@@ -9,7 +9,7 @@
 
 (ert-deftest test-tern-django-run-command ()
   "Check we can run `tern-django' python script."
-  (let ((tenr-django-script "-V"))
+  (let ((tern-django-script "-V"))
     (tern-django)
     (should (tern-django-running-p))))
 
@@ -18,6 +18,13 @@
   (let ((tern-django-process (start-process "cat" nil "cat")))
     (tern-django)
     (should (equal "cat" (car (process-command tern-django-process))))))
+
+(ert-deftest test-tern-django-show-process-buffer-on-error ()
+  "Check if `tern-django' show process output buffer on any error."
+  (let ((tern-django-script "does_not_exist.py"))
+    (tern-django)
+    (wait-for-tern-django)
+    (should (equal "*tern-django*" (buffer-name)))))
 
 (provide 'tern-django-test)
 

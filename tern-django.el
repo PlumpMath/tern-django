@@ -77,6 +77,9 @@
 (defvar tern-django-process nil
   "Currently running `tern-django' process.")
 
+(defvar tern-django-buffer "*tern-django*"
+  "Buffer for `tern-django' process output.")
+
 (defun tern-django-python ()
   "Detect python executable."
   (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
@@ -90,18 +93,28 @@
   (and tern-django-process
        (process-live-p tern-django-process)))
 
+(defun tern-django-process-sentinel (process event)
+  "Check `tern-django' exit code.
+Show PROCESS output buffer if any error has occurred.
+EVENT argument is ignored."
+  (unless (zerop (process-exit-status process))
+    (pop-to-buffer tern-django-buffer)))
+
 (defun tern-django-bootstrap ()
   "Start `tern-django' python script."
   (let ((default-directory tern-django-directory))
     (setq tern-django-process
           (start-process "tern-django"
-                         "*tern-django*"
+                         tern-django-buffer
                          (tern-django-python)
-                         tern-django-script))))
+                         tern-django-script))
+    (set-process-sentinel tern-django-process
+                          'tern-django-process-sentinel)))
 
 ;;;###autoload
 (defun tern-django ()
   "Create tern projects for django applications."
+  (interactive)
   (unless (tern-django-running-p)
     (tern-django-bootstrap)))
 
