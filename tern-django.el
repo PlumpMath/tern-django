@@ -68,10 +68,10 @@
 (require 'python)
 (require 'f)
 
-(defvar tern-django-directory (f-dirname load-file-name)
+(defvar tern-django-directory (file-name-directory load-file-name)
   "Directory contain `tern-django' package.")
 
-(defvar tern-django-script (f-join tern-django-directory "tern_django.py")
+(defvar tern-django-script "tern_django.py"
   "Script path to read django settings.")
 
 (defvar tern-django-process nil
@@ -90,14 +90,20 @@
   (and tern-django-process
        (process-live-p tern-django-process)))
 
+(defun tern-django-bootstrap ()
+  "Start `tern-django' python script."
+  (let ((default-directory tern-django-directory))
+    (setq tern-django-process
+          (start-process "tern-django"
+                         "*tern-django*"
+                         (tern-django-python)
+                         tern-django-script))))
+
 ;;;###autoload
 (defun tern-django ()
   "Create tern projects for django applications."
-  (setq tern-django-process
-        (start-process "tern-django"
-                       "*tern-django*"
-                       (tern-django-python)
-                       tern-django-script)))
+  (unless (tern-django-running-p)
+    (tern-django-bootstrap)))
 
 (provide 'tern-django)
 
