@@ -114,6 +114,15 @@ EVENT argument is ignored."
     (set-process-sentinel tern-django-process
                           'tern-django-process-sentinel)))
 
+(defun tern-django-terminate ()
+  "Terminate `tern-django' python script."
+  (when (tern-django-running-p)
+    (set-process-query-on-exit-flag tern-django-process nil)
+    (kill-process tern-django-process))
+  (when (get-buffer tern-django-buffer)
+    (kill-buffer tern-django-buffer))
+  (setq tern-django-process nil))
+
 ;;;###autoload
 (defun tern-django ()
   "Create tern projects for django applications."
