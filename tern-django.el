@@ -80,6 +80,10 @@
 (defvar tern-django-buffer "*tern-django*"
   "Buffer for `tern-django' process output.")
 
+(defun tern-django-p ()
+  "Return t if script run inside django environment."
+  (stringp (getenv "DJANGO_SETTINGS_MODULE")))
+
 (defun tern-django-python ()
   "Detect python executable."
   (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
@@ -102,17 +106,18 @@ EVENT argument is ignored."
 
 (defun tern-django-bootstrap ()
   "Start `tern-django' python script."
-  (let ((default-directory tern-django-directory))
-    (with-current-buffer
-        (get-buffer-create tern-django-buffer)
-      (erase-buffer))
-    (setq tern-django-process
-          (start-process "tern-django"
-                         tern-django-buffer
-                         (tern-django-python)
-                         tern-django-script))
-    (set-process-sentinel tern-django-process
-                          'tern-django-process-sentinel)))
+  (when (tern-django-p)
+    (let ((default-directory tern-django-directory))
+      (with-current-buffer
+          (get-buffer-create tern-django-buffer)
+        (erase-buffer))
+      (setq tern-django-process
+            (start-process "tern-django"
+                           tern-django-buffer
+                           (tern-django-python)
+                           tern-django-script))
+      (set-process-sentinel tern-django-process
+                            'tern-django-process-sentinel))))
 
 (defun tern-django-terminate ()
   "Terminate `tern-django' python script."

@@ -10,9 +10,17 @@
 (ert-deftest test-tern-django-run-command ()
   "Check we can run `tern-django' python script."
   (unwind-protect
-      (let ((tern-django-script ""))
+      (let ((tern-django-script "-i"))
         (tern-django)
         (should (tern-django-running-p)))
+    (tern-django-terminate)))
+
+(ert-deftest test-tern-django-dont-run-command-outside-django ()
+  "We will start process only in django environment."
+  (unwind-protect
+      (let (process-environment)
+        (tern-django)
+        (should-not (tern-django-running-p)))
     (tern-django-terminate)))
 
 (ert-deftest test-tern-django-run-single-process-at-time ()

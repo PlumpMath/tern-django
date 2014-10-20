@@ -7,6 +7,7 @@ project: $(SETTINGS)
 $(PROJECT_DIR):
 	mkdir -p $@
 
+$(SETTINGS): DJANGO_SETTINGS_MODULE=
 $(SETTINGS): $(PROJECT_DIR)
 	$(DJANGO_ADMIM) startproject project $<
 
