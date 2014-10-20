@@ -1,11 +1,14 @@
 DJANGO_ADMIM = ${BINDIR}/django-admin.py
+PROJECT_DIR = $(PWD)/.project
+SETTINGS = $(PROJECT_DIR)/project/settings.py
 
-default: project
+project: $(SETTINGS)
 
-project: $(PWD)/.project/project/settings.py
+$(PROJECT_DIR):
+	mkdir -p $@
 
-$(PWD)/.project:
-	mkdir -p $(PWD)/.project
+$(SETTINGS): $(PROJECT_DIR)
+	$(DJANGO_ADMIM) startproject project $<
 
-$(PWD)/.project/project/settings.py: $(PWD)/.project
-	$(DJANGO_ADMIM) startproject project $(PWD)/.project
+clean:
+	rm -rf $(PROJECT_DIR)
