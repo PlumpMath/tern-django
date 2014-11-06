@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DJANGO_ADMIM=$BINDIR/django-admin.py
+PROJECT_DIR=$PWD/.project
+APP1=app1
+
+mkdir -p $PROJECT_DIR
+
+DJANGO_SETTINGS_MODULE= $DJANGO_ADMIM startproject project $PROJECT_DIR
+
+$DJANGO_ADMIM startapp $APP1 $PROJECT_DIR
