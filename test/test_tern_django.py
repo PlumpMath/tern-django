@@ -7,3 +7,13 @@ def test_iter_django_applications():
 
     assert all([exists(join(app, '__init__.py'))
                 for app in tern_django.applications()])
+
+
+def test_write_tern_project():
+    """Check we write tern project in django applications."""
+
+    tern_django.update_tern_projects()
+    for app in tern_django.applications():
+        has_static = exists(join(app, 'static'))
+        has_tern = exists(join(app, tern_django.tern_file))
+        assert has_static == has_tern
