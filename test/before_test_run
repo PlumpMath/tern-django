@@ -1,11 +1,18 @@
 #!/bin/bash
 
-DJANGO_ADMIM=$BINDIR/django-admin.py
-PROJECT_DIR=$PWD/.project
-APP1=app1
+django_admim=$BINDIR/django-admin.py
+project_dir=$PWD/.project
+fixtures=$PWD/test/fixtures
 
-mkdir -p $PROJECT_DIR
+mkdir -p $project_dir
 
-DJANGO_SETTINGS_MODULE= $DJANGO_ADMIM startproject project $PROJECT_DIR
+cd $project_dir
 
-$DJANGO_ADMIM startapp $APP1 $PROJECT_DIR
+DJANGO_SETTINGS_MODULE= $django_admim startproject project .
+
+for app in app1 app2
+do
+    $django_admim startapp $app
+done
+
+ln -f $fixtures/settings.py $project_dir/project/settings.py
