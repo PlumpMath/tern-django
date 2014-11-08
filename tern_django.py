@@ -37,3 +37,7 @@ def update_tern_projects():
             tern_project = {'loadEagerly': ['static/**/*.js']}
             with open(join(app, tern_file), 'w') as project:
                 project.write(dumps(tern_project))
+
+
+if __name__ == '__main__':
+    update_tern_projects()
