@@ -17,3 +17,11 @@ def test_write_tern_project():
         has_static = exists(join(app, 'static'))
         has_tern = exists(join(app, tern_django.tern_file))
         assert has_static == has_tern
+
+
+def test_print_processed_projects(capsys):
+    """Check we print names of written tern projects."""
+
+    tern_django.update_tern_projects()
+    out, err = capsys.readouterr()
+    assert 'Write tern project' in out

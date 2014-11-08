@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from json import dumps
 from os.path import dirname, exists, join
 import django
@@ -35,7 +36,9 @@ def update_tern_projects():
     for app in applications():
         if exists(join(app, 'static')):
             tern_project = {'loadEagerly': ['static/**/*.js']}
-            with open(join(app, tern_file), 'w') as project:
+            app_file = join(app, tern_file)
+            print('Write tern project to', app_file)
+            with open(app_file, 'w') as project:
                 project.write(dumps(tern_project))
 
 
