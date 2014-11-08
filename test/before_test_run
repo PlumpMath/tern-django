@@ -13,6 +13,7 @@ DJANGO_SETTINGS_MODULE= $django_admim startproject project .
 for app in app1 app2
 do
     $django_admim startapp $app
+    mkdir -p $project_dir/$app/static
 done
 
-ln -f $fixtures/settings.py $project_dir/project/settings.py
+cp -f $fixtures/settings.py $project_dir/project/settings.py

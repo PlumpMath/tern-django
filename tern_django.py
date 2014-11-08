@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from json import dumps
+from json import dumps, loads
 from os.path import dirname, exists, join
 import copy
 import django
@@ -40,12 +40,37 @@ def update_tern_projects():
     """Update tern projects in each django application."""
 
     for app in applications():
-        if exists(join(app, 'static')):
-            tern_project = copy.deepcopy(default_tern_project)
-            app_file = join(app, tern_file)
-            print('Write tern project to', app_file)
-            with open(app_file, 'w') as project:
-                project.write(dumps(tern_project))
+        update_application(app)
+
+
+def update_application(app):
+    """Update tern project in specified django application."""
+
+    static = join(app, 'static')
+    if exists(static):
+        project_file = join(app, tern_file)
+        tern_project = copy.deepcopy(default_tern_project)
+        save_tern_project(tern_project, project_file)
+
+
+def save_tern_project(tern_project, project_file):
+    """Save tern project to specified file if necessary."""
+
+    if not exists(project_file):
+        write_tern_project(tern_project, project_file)
+        return
+    with open(project_file) as project:
+        written_project = loads(project.read())
+    if written_project != tern_project:
+        write_tern_project(tern_project, project_file)
+
+
+def write_tern_project(tern_project, project_file):
+    """Save tern project."""
+
+    print('Write tern project to', project_file)
+    with open(project_file, 'w') as project:
+        project.write(dumps(tern_project))
 
 
 if __name__ == '__main__':
