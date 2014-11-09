@@ -104,6 +104,9 @@ def process_html_template(project, html, app):
     rendered_source = source_template.render(source_context)
     try:
         parser = TemplateParser()
+        # Don't move this to TemplateParser init.  Super will not
+        # properly work with this class in python2.x
+        parser.src = []
         parser.feed(rendered_source)
     except HTMLParseError:
         pass
@@ -119,10 +122,6 @@ class TemplateParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         """Process script html tags."""
 
-        if not hasattr(self, 'src'):
-            # Don't move this to init.  Super will not properly
-            # work with this class in python2.x
-            self.src = []
         if tag == 'script':
             for attr, value in attrs:
                 if attr == 'src':
