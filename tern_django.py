@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from json import dumps, loads
-from os.path import dirname, exists, join, abspath
+from os.path import dirname, basename, exists, join, abspath
 from os import walk
 from django.conf import settings
 from django.template import Template, Context
@@ -10,6 +10,10 @@ try:
     from html.parser import HTMLParser, HTMLParseError
 except ImportError:
     from HTMLParser import HTMLParser, HTMLParseError
+try:
+    from urllib.parse import urlsplit
+except ImportError:
+    from urlparse import urlsplit
 import copy
 import django
 
@@ -80,17 +84,17 @@ def write_tern_project(tern_project, project_file):
         project.write(dumps(tern_project))
 
 
-def analyze_templates(project, app_directory):
+def analyze_templates(project, app):
     """Add to project properties grabbed from app templates."""
 
-    templates = join(app_directory, 'templates')
+    templates = join(app, 'templates')
     for root, dirs, files in walk(templates):
         htmls = [join(root, f) for f in files if f.endswith('.html')]
         for html in htmls:
-            process_html_template(project, html, app_directory)
+            process_html_template(project, html, app)
 
 
-def process_html_template(project, html, app_directory):
+def process_html_template(project, html, app):
     """Grab static files from html template."""
 
     with open(html) as template:
@@ -99,23 +103,23 @@ def process_html_template(project, html, app_directory):
     source_context = Context({})
     rendered_source = source_template.render(source_context)
     try:
-        parser = StaticFilesParser(app_directory)
+        parser = StaticFilesParser()
         parser.feed(rendered_source)
     except HTMLParseError:
         pass
-    project['libs'].extend(parser.libs)
-    project['loadEagerly'].extend(parser.loadEagerly)
+    analyzer = StaticFilesAnalyzer(app, parser.src)
+    analyzer.find()
+    project['libs'].extend(analyzer.libs)
+    project['loadEagerly'].extend(analyzer.loadEagerly)
 
 
 class StaticFilesParser(HTMLParser):
     """Static files html grabber."""
 
-    def __init__(self, app_directory):
+    def __init__(self):
 
         super(StaticFilesParser, self).__init__()
-        self.app_directory = app_directory
-        self.libs = []
-        self.loadEagerly = []
+        self.src = []
 
     def handle_starttag(self, tag, attrs):
         """Process script html tags."""
@@ -123,23 +127,57 @@ class StaticFilesParser(HTMLParser):
         if tag == 'script':
             for attr, value in attrs:
                 if attr == 'src':
-                    self.handle_src_value(value)
+                    self.src.append(value)
 
-    def handle_src_value(self, value):
-        """Save src attribute value in parser properties."""
 
-        location = self.locate_static(value)
-        if location and not location.startswith(self.app_directory):
-            self.loadEagerly.append(location)
+class StaticFilesAnalyzer(object):
+    """Analyze static files source."""
 
-    def locate_static(self, uri):
+    def __init__(self, app, sources):
+
+        self.sources = sources
+        self.app = app
+        self.libs = []
+        self.loadEagerly = []
+
+    def find(self):
+        """Find true definitions of each source."""
+
+        for src in self.sources:
+            self.handle(src)
+
+    def handle(self, src):
+        """Determine and save true src location."""
+
+        if self.is_relative(src):
+            self.process_relative_url(src)
+        else:
+            self.process_absolute_url(src)
+
+    def is_relative(self, src):
+        """Check if src specify resource from same domain."""
+
+        return src.startswith('/')
+
+    def process_relative_url(self, uri):
         """Find static file from its uri."""
 
         file_base = uri.replace(settings.STATIC_URL, '')
         for app in applications():
             path = abspath(join(app, 'static', file_base))
-            if exists(path):
-                return path
+            if exists(path) and not path.startswith(self.app):
+                self.loadEagerly.append(path)
+                break
+
+    def process_absolute_url(self, url):
+        """Find external library.  Download if needed."""
+
+        scheme, netloc, path, query, fragment = urlsplit(url)
+        base = basename(path)
+        for lib in ['jquery', 'underscore']:
+            if base.startswith(lib):
+                self.libs.append(lib)
+                break
 
 
 if __name__ == '__main__':

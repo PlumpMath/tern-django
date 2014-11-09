@@ -64,3 +64,12 @@ def test_find_static_files_from_other_application():
     app2 = join(project_dir, 'app2')
     tern_django.analyze_templates(project, app2)
     assert project == {'libs': [], 'loadEagerly': [app1_static_file]}
+
+
+def test_find_static_predefined_libraries():
+    """Check we can detect predefined libraries in templates files."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    jquery_app = join(project_dir, 'jquery_app')
+    tern_django.analyze_templates(project, jquery_app)
+    assert project == {'libs': ['jquery'], 'loadEagerly': []}
