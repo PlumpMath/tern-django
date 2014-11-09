@@ -54,3 +54,13 @@ def test_does_not_modify_existed_files(capsys, no_tern_projects):
     tern_django.update_tern_projects()
     out, err = capsys.readouterr()
     assert app1_project not in out
+
+
+def test_find_static_files_from_other_application():
+    """Check we can search in templates static files include."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    app1_static_file = join(project_dir, 'app1', 'static', 'app1', 'app1.js')
+    app2 = join(project_dir, 'app2')
+    tern_django.analyze_templates(project, app2)
+    assert project == {'libs': [], 'loadEagerly': [app1_static_file]}

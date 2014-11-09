@@ -17,3 +17,11 @@ do
 done
 
 cp -f $fixtures/settings.py $project_dir/project/settings.py
+
+mkdir -p $project_dir/app1/static/app1
+
+cp -f $fixtures/app1.js $project_dir/app1/static/app1/app1.js
+
+mkdir -p $project_dir/app2/templates/app2
+
+cp -f $fixtures/app2.html $project_dir/app2/templates/app2/app2.html
