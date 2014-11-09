@@ -103,34 +103,33 @@ def process_html_template(project, html, app):
     source_context = Context({})
     rendered_source = source_template.render(source_context)
     try:
-        parser = StaticFilesParser()
+        parser = TemplateParser()
         parser.feed(rendered_source)
     except HTMLParseError:
         pass
-    analyzer = StaticFilesAnalyzer(app, parser.src)
+    analyzer = TemplateAnalyzer(app, parser.src)
     analyzer.find()
     project['libs'].extend(analyzer.libs)
     project['loadEagerly'].extend(analyzer.loadEagerly)
 
 
-class StaticFilesParser(HTMLParser):
+class TemplateParser(HTMLParser):
     """Static files html grabber."""
-
-    def __init__(self):
-
-        super(StaticFilesParser, self).__init__()
-        self.src = []
 
     def handle_starttag(self, tag, attrs):
         """Process script html tags."""
 
+        if not hasattr(self, 'src'):
+            # Don't move this to init.  Super will not properly
+            # work with this class in python2.x
+            self.src = []
         if tag == 'script':
             for attr, value in attrs:
                 if attr == 'src':
                     self.src.append(value)
 
 
-class StaticFilesAnalyzer(object):
+class TemplateAnalyzer(object):
     """Analyze static files source."""
 
     def __init__(self, app, sources):
