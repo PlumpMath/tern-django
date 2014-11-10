@@ -60,7 +60,7 @@ def update_application(app):
     if exists(static):
         project_file = join(app, tern_file)
         tern_project = copy.deepcopy(default_tern_project)
-        # analyze_templates(tern_project, app)
+        analyze_templates(tern_project, app)
         save_tern_project(tern_project, project_file)
 
 
