@@ -73,3 +73,17 @@ def test_find_static_predefined_libraries():
     jquery_app = join(project_dir, 'jquery_app')
     tern_django.analyze_templates(project, jquery_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
+
+
+def test_meaningful_template():
+    """Test if we need process specified template."""
+
+    assert tern_django.meaningful_template('<script>function () {};</script>')
+    assert not tern_django.meaningful_template('<body></body>')
+
+
+def test_needs_to_be_rendered():
+    """Test if we need render specified template."""
+
+    assert tern_django.needs_to_be_rendered('<h1>{% load staticfiles %}</h1>')
+    assert not tern_django.needs_to_be_rendered('<body></body>')

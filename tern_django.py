@@ -99,21 +99,32 @@ def process_html_template(project, html, app):
 
     with open(html) as template:
         source = template.read()
-    source_template = Template(source)
-    source_context = Context({})
-    rendered_source = source_template.render(source_context)
-    try:
-        parser = TemplateParser()
-        # Don't move this to TemplateParser init.  Super will not
-        # properly work with this class in python2.x
-        parser.src = []
-        parser.feed(rendered_source)
-    except HTMLParseError:
-        pass
-    analyzer = TemplateAnalyzer(app, parser.src)
-    analyzer.find()
-    project['libs'].extend(analyzer.libs)
-    project['loadEagerly'].extend(analyzer.loadEagerly)
+    if meaningful_template(source):
+        rendered_source = render_if_necessary(source)
+        try:
+            parser = TemplateParser()
+            # Don't move this to TemplateParser init.  Super will not
+            # properly work with this class in python2.x
+            parser.src = []
+            parser.feed(rendered_source)
+        except HTMLParseError:
+            pass
+        analyzer = TemplateAnalyzer(app, parser.src)
+        analyzer.find()
+        project['libs'].extend(analyzer.libs)
+        project['loadEagerly'].extend(analyzer.loadEagerly)
+
+
+def render_if_necessary(source):
+    """Render django template if necessary."""
+
+    if needs_to_be_rendered(source):
+        source_template = Template(source)
+        source_context = Context({})
+        rendered_source = source_template.render(source_context)
+        return rendered_source
+    else:
+        return source
 
 
 class TemplateParser(HTMLParser):
@@ -176,6 +187,19 @@ class TemplateAnalyzer(object):
             if base.startswith(lib):
                 self.libs.append(lib)
                 break
+
+
+def meaningful_template(template):
+    """Check if template is interesting for tern."""
+
+    # Don't close first script tag here.
+    return '<script' in template and '</script>' in template
+
+
+def needs_to_be_rendered(template):
+    """Check if template has necessary django tags"""
+
+    return '{% load staticfiles %}' in template
 
 
 if __name__ == '__main__':
