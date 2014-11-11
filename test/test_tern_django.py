@@ -108,3 +108,12 @@ def test_connect_multiple_times():
     tern_django.connect()
     two = tern_django.database_cursor
     assert one is two
+
+
+def test_disconnect_multiple_times():
+    """Check we can safely disconnect from cache many times."""
+
+    tern_django.disconnect()
+    tern_django.disconnect()
+    assert not tern_django.database_connection
+    assert not tern_django.database_cursor

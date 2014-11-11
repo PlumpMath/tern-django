@@ -219,5 +219,18 @@ def connect():
         database_cursor = database_connection.cursor()
 
 
+def disconnect():
+    """Disconnect from cache database."""
+
+    global database_connection
+    global database_cursor
+    if database_cursor is not None:
+        database_cursor.close()
+    if database_connection is not None:
+        database_connection.close()
+    database_connection = None
+    database_cursor = None
+
+
 if __name__ == '__main__':
     update_tern_projects()
