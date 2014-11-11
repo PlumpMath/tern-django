@@ -6,6 +6,7 @@ import pytest
 
 
 project_dir = join(getcwd(), '.project')
+tern_django.database_file = join(getcwd(), 'tern-django.sqlite')
 
 
 @pytest.fixture
@@ -87,3 +88,13 @@ def test_needs_to_be_rendered():
 
     assert tern_django.needs_to_be_rendered('<h1>{% load staticfiles %}</h1>')
     assert not tern_django.needs_to_be_rendered('<body></body>')
+
+
+# Sql cache.
+
+
+def test_create_cache_file():
+    """Check we create database file."""
+
+    tern_django.connect()
+    assert exists(tern_django.database_file)

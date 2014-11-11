@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from json import dumps, loads
-from os.path import dirname, basename, exists, join, abspath
+from os.path import dirname, basename, exists, join, abspath, expanduser
 from os import walk
 from django.conf import settings
 from django.template import Template, Context
@@ -16,6 +16,7 @@ except ImportError:
     from urlparse import urlsplit
 import copy
 import django
+import sqlite3
 
 
 django_version = django.get_version()
@@ -200,6 +201,21 @@ def needs_to_be_rendered(template):
     """Check if template has necessary django tags"""
 
     return '{% load staticfiles %}' in template
+
+# Sql cache.
+
+database_file = expanduser('~/.emacs.d/tern-django.sqlite')
+database_connection = None
+database_cursor = None
+
+
+def connect():
+    """Connect to cache database."""
+
+    global database_connection
+    global database_cursor
+    database_connection = sqlite3.connect(database_file)
+    database_cursor = database_connection.cursor()
 
 
 if __name__ == '__main__':
