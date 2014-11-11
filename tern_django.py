@@ -14,6 +14,7 @@ try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit
+import atexit
 import copy
 import django
 import sqlite3
@@ -230,6 +231,9 @@ def disconnect():
         database_connection.close()
     database_connection = None
     database_cursor = None
+
+
+atexit.register(disconnect)
 
 
 if __name__ == '__main__':
