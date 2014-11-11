@@ -214,8 +214,9 @@ def connect():
 
     global database_connection
     global database_cursor
-    database_connection = sqlite3.connect(database_file)
-    database_cursor = database_connection.cursor()
+    if database_connection is None or database_cursor is None:
+        database_connection = sqlite3.connect(database_file)
+        database_cursor = database_connection.cursor()
 
 
 if __name__ == '__main__':

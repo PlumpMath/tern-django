@@ -98,3 +98,13 @@ def test_create_cache_file():
 
     tern_django.connect()
     assert exists(tern_django.database_file)
+
+
+def test_connect_multiple_times():
+    """Check that we can safely connect and disconnect to the cache."""
+
+    tern_django.connect()
+    one = tern_django.database_cursor
+    tern_django.connect()
+    two = tern_django.database_cursor
+    assert one is two
