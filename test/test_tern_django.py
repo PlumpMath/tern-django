@@ -117,3 +117,14 @@ def test_disconnect_multiple_times():
     tern_django.disconnect()
     assert not tern_django.database_connection
     assert not tern_django.database_cursor
+
+
+def test_database_table_operations():
+    """Check we can create, read and write to cache table."""
+
+    tern_django.init_cache()
+    html_file = '/test/file.html'
+    html_args = (1415483694.061135, 'jquery', '')
+    tern_django.set_cache(html_file, *html_args)
+    obtained = tern_django.get_cache(html_file)
+    assert obtained == html_args
