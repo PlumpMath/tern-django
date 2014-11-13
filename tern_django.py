@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from json import dumps, loads
-from os.path import dirname, basename, exists, join, abspath, expanduser
-from os import walk
 from django.conf import settings
 from django.template import Template, Context
+from json import dumps, loads
+from os import walk
+from os.path import (
+    abspath, basename, dirname, exists, expanduser, getmtime, join)
 try:
     from html.parser import HTMLParser, HTMLParseError
 except ImportError:
@@ -48,6 +49,9 @@ def applications():
         return directories
 
 
+# Tern project saving.
+
+
 def update_tern_projects():
     """Update tern projects in each django application."""
 
@@ -86,6 +90,9 @@ def write_tern_project(tern_project, project_file):
         project.write(dumps(tern_project))
 
 
+# Templates analyze.
+
+
 def analyze_templates(project, app):
     """Add to project properties grabbed from app templates."""
 
@@ -99,22 +106,48 @@ def analyze_templates(project, app):
 def process_html_template(project, html, app):
     """Grab static files from html template."""
 
-    with open(html) as template:
-        source = template.read()
-    if meaningful_template(source):
-        rendered_source = render_if_necessary(source)
-        try:
-            parser = TemplateParser()
-            # Don't move this to TemplateParser init.  Super will not
-            # properly work with this class in python2.x
-            parser.src = []
-            parser.feed(rendered_source)
-        except HTMLParseError:
-            pass
-        analyzer = TemplateAnalyzer(app, parser.src)
-        analyzer.find()
-        project['libs'].extend(analyzer.libs)
-        project['loadEagerly'].extend(analyzer.loadEagerly)
+    libs = []
+    load_eagerly = []
+    cached = template_cache(html)
+    if cached:
+        libs, load_eagerly = cached
+    else:
+        with open(html) as template:
+            source = template.read()
+        if meaningful_template(source):
+            libs, load_eagerly = parse_template(source, app)
+    project['libs'].extend(libs)
+    project['loadEagerly'].extend(load_eagerly)
+
+
+def template_cache(html_file):
+    """Check database cache for html file information."""
+
+    cache = get_cache(html_file)
+    if cache:
+        cache_mtime, cache_libs, cache_eagerly = cache
+        mtime = getmtime(html_file)
+        if mtime < cache_mtime:
+            libs = loads(cache_libs) if cache_libs else []
+            load_eagerly = loads(cache_eagerly) if cache_eagerly else []
+            return libs, load_eagerly
+
+
+def parse_template(source, app):
+    """Parse html source string.  Save information in the project."""
+
+    rendered_source = render_if_necessary(source)
+    try:
+        parser = TemplateParser()
+        # Don't move this to TemplateParser init.  Super will not
+        # properly work with this class in python2.x
+        parser.src = []
+        parser.feed(rendered_source)
+    except HTMLParseError:
+        pass
+    analyzer = TemplateAnalyzer(app, parser.src)
+    analyzer.find()
+    return analyzer.libs, analyzer.loadEagerly
 
 
 def render_if_necessary(source):
@@ -203,7 +236,9 @@ def needs_to_be_rendered(template):
 
     return '{% load staticfiles %}' in template
 
+
 # Sql cache.
+
 
 database_file = expanduser('~/.emacs.d/tern-django.sqlite')
 database_connection = None
