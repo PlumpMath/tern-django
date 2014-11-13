@@ -233,9 +233,6 @@ def disconnect():
     database_cursor = None
 
 
-atexit.register(disconnect)
-
-
 def init_cache():
     """Create cache table if necessary."""
 
@@ -255,9 +252,9 @@ def get_cache(file_name):
     """Get file name attributes from cache if exists."""
 
     database_cursor.execute("""
-        select "mtime", "libs", "loadEagerly"
-        from tern_django
-        where file_name=?;
+    select "mtime", "libs", "loadEagerly"
+    from tern_django
+    where file_name=?;
     """, (file_name,))
     return database_cursor.fetchone()
 
@@ -282,4 +279,6 @@ def set_cache(file_name, mtime, libs, loadEagerly):
 
 
 if __name__ == '__main__':
+    atexit.register(disconnect)
+    init_cache()
     update_tern_projects()
