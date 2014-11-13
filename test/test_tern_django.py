@@ -128,3 +128,16 @@ def test_database_table_operations():
     tern_django.set_cache(html_file, *html_args)
     obtained = tern_django.get_cache(html_file)
     assert obtained == html_args
+
+
+def test_database_insert_or_update():
+    """Check that set_cache will insert record if missed and update record
+    if it already present.
+    """
+
+    tern_django.init_cache()
+    file_name = '/test/me/twice.html'
+    params = (1415483694.061135, 'underscore', '')
+    tern_django.set_cache(file_name, *params)
+    tern_django.set_cache(file_name, *params)
+    assert params == tern_django.get_cache(file_name)

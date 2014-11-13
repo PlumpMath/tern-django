@@ -265,10 +265,19 @@ def get_cache(file_name):
 def set_cache(file_name, mtime, libs, loadEagerly):
     """Set file name attributes in cache."""
 
-    database_cursor.execute("""
+    if get_cache(file_name):
+        query = """
+        update tern_django set "mtime"=?, "libs"=?, "loadEagerly"=?
+        where "file_name"=?;
+        """
+        params = (mtime, libs, loadEagerly, file_name)
+    else:
+        query = """
         insert into tern_django("file_name", "mtime", "libs", "loadEagerly")
         values (?, ?, ?, ?);
-    """, (file_name, mtime, libs, loadEagerly))
+        """
+        params = (file_name, mtime, libs, loadEagerly)
+    database_cursor.execute(query, params)
     database_connection.commit()
 
 
