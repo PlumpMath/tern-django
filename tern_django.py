@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from django.conf import settings
-from django.template import Template, Context
+import atexit
+import copy
+import sqlite3
+try:
+    from html.parser import HTMLParser, HTMLParseError
+except ImportError:
+    from HTMLParser import HTMLParser, HTMLParseError
 from json import dumps, loads
 from os import walk
 from os.path import (
     abspath, basename, dirname, exists, expanduser, getmtime, join)
 try:
-    from html.parser import HTMLParser, HTMLParseError
-except ImportError:
-    from HTMLParser import HTMLParser, HTMLParseError
-try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit
-import atexit
-import copy
+
 import django
-import sqlite3
+from django.conf import settings
+from django.template import Template, Context
 
 
 django_version = django.get_version()
