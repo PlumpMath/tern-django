@@ -1,9 +1,13 @@
+from __future__ import absolute_import
+from datetime import timedelta
 from json import dumps
-from os.path import join, exists
 from os import getcwd, unlink
+from os.path import join, exists
 from time import time
-import tern_django
+
 import pytest
+
+import tern_django
 
 
 project_dir = join(getcwd(), '.project')
@@ -166,3 +170,16 @@ def test_skip_already_analyzed_template():
     tern_django.set_cache(template, time(), '["jquery"]', '')
     tern_django.analyze_templates(project, app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
+
+
+def test_save_analyzed_template_data():
+
+    project = {'libs': [], 'loadEagerly': []}
+    app = join(project_dir, 'app_for_cache')
+    template = join(app, 'templates', 'app_for_cache', 'underscore_app.html')
+    timestamp = time() - timedelta(hours=1).total_seconds()
+    tern_django.init_cache()
+    tern_django.set_cache(template, timestamp, '["jquery"]', '')
+    tern_django.analyze_templates(project, app)
+    _, libs, _ = tern_django.get_cache(template)
+    assert '["underscore"]' == libs

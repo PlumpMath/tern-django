@@ -109,7 +109,7 @@ def process_html_template(project, html, app):
 
     libs = []
     load_eagerly = []
-    cached = template_cache(html)
+    cached = get_template_cache(html)
     if cached:
         libs, load_eagerly = cached
     else:
@@ -117,11 +117,12 @@ def process_html_template(project, html, app):
             source = template.read()
         if meaningful_template(source):
             libs, load_eagerly = parse_template(source, app)
+        set_template_cache(html, libs, load_eagerly)
     project['libs'].extend(libs)
     project['loadEagerly'].extend(load_eagerly)
 
 
-def template_cache(html_file):
+def get_template_cache(html_file):
     """Check database cache for html file information."""
 
     cache = get_cache(html_file)
@@ -132,6 +133,13 @@ def template_cache(html_file):
             libs = loads(cache_libs) if cache_libs else []
             load_eagerly = loads(cache_eagerly) if cache_eagerly else []
             return libs, load_eagerly
+
+
+def set_template_cache(html_file, libs, load_eagerly):
+    """Save html file information into database cache."""
+
+    mtime = getmtime(html_file)
+    set_cache(html_file, mtime, dumps(libs), dumps(load_eagerly))
 
 
 def parse_template(source, app):
