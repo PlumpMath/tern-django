@@ -16,6 +16,10 @@ try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit
+try:
+    from urllib.request import urlopen, URLError
+except ImportError:
+    from urllib2 import urlopen, URLError
 
 import django
 from django.conf import settings
@@ -231,6 +235,9 @@ class TemplateAnalyzer(object):
             if base.startswith(lib):
                 self.libs.append(lib)
                 break
+        else:
+            stored_lib = download_library(url)
+            self.loadEagerly.append(stored_lib)
 
 
 def meaningful_template(template):
@@ -320,6 +327,25 @@ def set_cache(file_name, mtime, libs, loadEagerly):
         params = (file_name, mtime, libs, loadEagerly)
     database_cursor.execute(query, params)
     database_connection.commit()
+
+
+# Libraries download.
+
+
+storage = expanduser('~/.emacs.d/tern-django-storage')
+
+
+def create_storage():
+    """Create storage directory if necessary."""
+
+    pass
+
+
+def download_library(url):
+    """Download library if necessary."""
+
+    response = urlopen(url)
+    content = response.read()
 
 
 if __name__ == '__main__':

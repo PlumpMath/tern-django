@@ -11,7 +11,12 @@ import tern_django
 
 
 project_dir = join(getcwd(), '.project')
+fixture_dir = join(getcwd(), 'test', 'fixtures')
 tern_django.database_file = join(getcwd(), 'tern-django.sqlite')
+tern_django.storage = join(getcwd(), 'tmp')
+
+
+# Fixtures.
 
 
 @pytest.fixture
@@ -22,6 +27,18 @@ def no_tern_projects():
         project = join(app, tern_django.tern_file)
         if exists(project):
             unlink(project)
+
+
+@pytest.fixture(autouse=True)
+def no_urlopen(monkeypatch):
+    """Fail all http requests with URLError."""
+
+    def raise_url_error(url, *args, **kwargs):
+        raise tern_django.URLError('Monkey patch.')
+    monkeypatch.setattr(tern_django, 'urlopen', raise_url_error)
+
+
+# Applications.
 
 
 def test_iter_django_applications():
@@ -183,3 +200,22 @@ def test_save_analyzed_template_data():
     tern_django.analyze_templates(project, app)
     _, libs, _ = tern_django.get_cache(template)
     assert '["underscore"]' == libs
+
+
+# Libraries download.
+
+
+def test_download_external_libraries():
+    """Check we can download libraries external from internet."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    app = join(project_dir, 'backbone_app')
+    backbone = join(fixture_dir, 'backbone.min.js')
+    sha256 = ''
+    tern_django.urlopen = lambda url: open(backbone)
+    tern_django.init_cache()
+    tern_django.analyze_templates(project, app)
+    stored_file = open(join(tern_django.storage, sha256)).read()
+    fixture_file = open(backbone).read()
+    assert stored_file == fixture_file
+    assert project == {}
