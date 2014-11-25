@@ -10,7 +10,7 @@ cd $project_dir
 
 DJANGO_SETTINGS_MODULE= $django_admim startproject project .
 
-for app in app1 app2 jquery_app app_for_cache
+for app in app1 app2 jquery_app app_for_cache backbone_app
 do
     $django_admim startapp $app
     mkdir -p $project_dir/$app/static/$app
@@ -23,3 +23,4 @@ cp -f $fixtures/app2.js $project_dir/app2/static/app2/app2.js
 cp -f $fixtures/app2.html $project_dir/app2/templates/app2/app2.html
 cp -f $fixtures/jquery_app.html $project_dir/jquery_app/templates/jquery_app/jquery_app.html
 cp -f $fixtures/underscore_app.html $project_dir/app_for_cache/templates/app_for_cache/underscore_app.html
+cp -f $fixtures/backbone_app.html $project_dir/backbone_app/templates/backbone_app/backbone_app.html
