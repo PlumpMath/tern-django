@@ -211,11 +211,12 @@ def test_download_external_libraries():
     project = {'libs': [], 'loadEagerly': []}
     app = join(project_dir, 'backbone_app')
     backbone = join(fixture_dir, 'backbone.min.js')
-    sha256 = ''
+    sha256 = '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825'
     tern_django.urlopen = lambda url: open(backbone)
     tern_django.init_cache()
     tern_django.analyze_templates(project, app)
-    stored_file = open(join(tern_django.storage, sha256)).read()
+    stored_file_path = join(tern_django.storage, sha256)
+    stored_file = open(stored_file_path).read()
     fixture_file = open(backbone).read()
     assert stored_file == fixture_file
-    assert project == {}
+    assert project == {'libs': [], 'loadEagerly': [stored_file_path]}

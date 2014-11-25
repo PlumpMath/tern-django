@@ -4,12 +4,13 @@ from __future__ import print_function
 import atexit
 import copy
 import sqlite3
+from hashlib import sha256
 try:
     from html.parser import HTMLParser, HTMLParseError
 except ImportError:
     from HTMLParser import HTMLParser, HTMLParseError
 from json import dumps, loads
-from os import walk
+from os import makedirs, walk
 from os.path import (
     abspath, basename, dirname, exists, expanduser, getmtime, join)
 try:
@@ -338,14 +339,30 @@ storage = expanduser('~/.emacs.d/tern-django-storage')
 def create_storage():
     """Create storage directory if necessary."""
 
-    pass
+    try:
+        makedirs(storage)
+    except OSError:
+        pass                    # Storage exists.
 
 
 def download_library(url):
     """Download library if necessary."""
 
-    response = urlopen(url)
-    content = response.read()
+    try:
+        create_storage()
+        response = urlopen(url)
+        content = response.read()
+        content_hash = sha256()
+        content_hash.update(content.encode())
+        file_name = content_hash.hexdigest()
+        file_path = join(storage, file_name)
+        if not exists(file_path):
+            with open(file_path, 'w') as cache_object:
+                cache_object.write(content)
+    except URLError:
+        pass
+    else:
+        return file_path
 
 
 if __name__ == '__main__':
