@@ -140,7 +140,7 @@ def process_html_template(project, html, app):
 def get_template_cache(html_file):
     """Check database cache for html file information."""
 
-    cache = get_cache(html_file)
+    cache = get_html_cache(html_file)
     if cache:
         cache_mtime, cache_libs, cache_eagerly = cache
         mtime = getmtime(html_file)
@@ -154,7 +154,7 @@ def set_template_cache(html_file, libs, load_eagerly):
     """Save html file information into database cache."""
 
     mtime = getmtime(html_file)
-    set_cache(html_file, mtime, dumps(libs), dumps(load_eagerly))
+    set_html_cache(html_file, mtime, dumps(libs), dumps(load_eagerly))
 
 
 def parse_template(source, app):
@@ -300,7 +300,7 @@ def init_cache():
 
     connect()
     database_cursor.executescript("""
-    create table if not exists tern_django (
+    create table if not exists html_cache (
         "id" integer primary key,
         "file_name" text unique not null,
         "mtime" real,
@@ -314,29 +314,29 @@ def init_cache():
     database_connection.commit()
 
 
-def get_cache(file_name):
+def get_html_cache(file_name):
     """Get file name attributes from cache if exists."""
 
     database_cursor.execute("""
     select "mtime", "libs", "loadEagerly"
-    from tern_django
+    from html_cache
     where file_name=?;
     """, (file_name,))
     return database_cursor.fetchone()
 
 
-def set_cache(file_name, mtime, libs, loadEagerly):
+def set_html_cache(file_name, mtime, libs, loadEagerly):
     """Set file name attributes in cache."""
 
-    if get_cache(file_name):
+    if get_html_cache(file_name):
         query = """
-        update tern_django set "mtime"=?, "libs"=?, "loadEagerly"=?
+        update html_cache set "mtime"=?, "libs"=?, "loadEagerly"=?
         where "file_name"=?;
         """
         params = (mtime, libs, loadEagerly, file_name)
     else:
         query = """
-        insert into tern_django("file_name", "mtime", "libs", "loadEagerly")
+        insert into html_cache("file_name", "mtime", "libs", "loadEagerly")
         values (?, ?, ?, ?);
         """
         params = (file_name, mtime, libs, loadEagerly)

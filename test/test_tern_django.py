@@ -150,32 +150,32 @@ def test_disconnect_multiple_times():
     assert not tern_django.database_cursor
 
 
-def test_database_table_operations():
-    """Check we can create, read and write to cache table."""
+def test_html_cache_table_operations():
+    """Check we can create, read and write to html_cache table."""
 
     tern_django.init_cache()
     html_file = '/test/file.html'
     html_args = (1415483694.061135, '["jquery"]', '')
-    tern_django.set_cache(html_file, *html_args)
-    obtained = tern_django.get_cache(html_file)
+    tern_django.set_html_cache(html_file, *html_args)
+    obtained = tern_django.get_html_cache(html_file)
     assert obtained == html_args
 
 
-def test_database_insert_or_update():
-    """Check that set_cache will insert record if missed and update record
+def test_html_cache_table_insert_or_update():
+    """Check that set_html_cache will insert record if missed and update record
     if it already present.
     """
 
     tern_django.init_cache()
     file_name = '/test/me/twice.html'
     params = (1415483694.061135, '["underscore"]', '')
-    tern_django.set_cache(file_name, *params)
-    tern_django.set_cache(file_name, *params)
-    assert params == tern_django.get_cache(file_name)
+    tern_django.set_html_cache(file_name, *params)
+    tern_django.set_html_cache(file_name, *params)
+    assert params == tern_django.get_html_cache(file_name)
 
 
-def test_urlopen_cache_table_operations():
-    """Check we can create, read and write to urlopen cache table."""
+def test_url_cache_table_operations():
+    """Check we can create, read and write to url cache table."""
 
     tern_django.init_cache()
     url, sha = 'http://example.com', 'nthotnhunoteh'
@@ -193,7 +193,7 @@ def test_skip_already_analyzed_template():
     app = join(project_dir, 'app_for_cache')
     template = join(app, 'templates', 'app_for_cache', 'underscore_app.html')
     tern_django.init_cache()
-    tern_django.set_cache(template, time(), '["jquery"]', '')
+    tern_django.set_html_cache(template, time(), '["jquery"]', '')
     tern_django.analyze_templates(project, app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
@@ -205,9 +205,9 @@ def test_save_analyzed_template_data():
     template = join(app, 'templates', 'app_for_cache', 'underscore_app.html')
     timestamp = time() - timedelta(hours=1).total_seconds()
     tern_django.init_cache()
-    tern_django.set_cache(template, timestamp, '["jquery"]', '')
+    tern_django.set_html_cache(template, timestamp, '["jquery"]', '')
     tern_django.analyze_templates(project, app)
-    _, libs, _ = tern_django.get_cache(template)
+    _, libs, _ = tern_django.get_html_cache(template)
     assert '["underscore"]' == libs
 
 
