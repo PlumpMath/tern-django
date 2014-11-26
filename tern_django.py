@@ -352,7 +352,9 @@ def get_url_cache(url):
     from url_cache
     where "url"=?;
     """, (url,))
-    return database_cursor.fetchone()[0]
+    received = database_cursor.fetchone()
+    if received:
+        return received[0]
 
 
 def set_url_cache(url, sha256):
@@ -382,6 +384,10 @@ def create_storage():
 
 def download_library(url):
     """Download library if necessary."""
+
+    cached = get_url_cache(url)
+    if cached:
+        return cached
 
     try:
         create_storage()

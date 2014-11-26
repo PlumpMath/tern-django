@@ -229,3 +229,12 @@ def test_download_external_libraries():
     fixture_file = open(backbone).read()
     assert stored_file == fixture_file
     assert project == {'libs': [], 'loadEagerly': [stored_file_path]}
+
+
+def test_skip_already_downloaded_libraries():
+    """Check we will use cached sha256 value from cache."""
+
+    tern_django.init_cache()
+    url, sha = 'http://example.com', 'nthotnhunoteh'
+    tern_django.set_url_cache(url, sha)
+    assert sha == tern_django.download_library(url)
