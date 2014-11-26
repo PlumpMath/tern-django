@@ -250,3 +250,16 @@ def test_save_downloaded_library_hash():
     tern_django.urlopen = lambda url: open(backbone)
     tern_django.download_library(backbone_url)
     assert sha256 == tern_django.get_url_cache(backbone_url)
+
+
+def test_download_library_output_format():
+    """Check that we obtain same results whenever we got if from url_cache or
+    download it to storage manually."""
+
+    tern_django.init_cache()
+    backbone = join(fixture_dir, 'backbone.min.js')
+    backbone_url = 'http://backbonejs.org/backbone-min.js'
+    tern_django.urlopen = lambda url: open(backbone)
+    downloaded = tern_django.download_library(backbone_url)
+    from_cache = tern_django.download_library(backbone_url)
+    assert downloaded == from_cache

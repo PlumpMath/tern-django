@@ -387,7 +387,7 @@ def download_library(url):
 
     cached = get_url_cache(url)
     if cached:
-        return cached
+        return join(storage, cached)
 
     try:
         create_storage()
