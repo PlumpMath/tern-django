@@ -36,6 +36,16 @@ default_tern_project = {
 }
 
 
+def run_tern_django():
+    """Perform django project analysis.
+    Basically program entry point.
+    """
+
+    atexit.register(disconnect)
+    init_cache()
+    update_tern_projects()
+
+
 def applications():
     """Collect directories with django applications."""
 
@@ -391,6 +401,4 @@ def download_library(url):
 
 
 if __name__ == '__main__':
-    atexit.register(disconnect)
-    init_cache()
-    update_tern_projects()
+    run_tern_django()
