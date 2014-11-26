@@ -174,6 +174,15 @@ def test_database_insert_or_update():
     assert params == tern_django.get_cache(file_name)
 
 
+def test_urlopen_cache_table_operations():
+    """Check we can create, read and write to urlopen cache table."""
+
+    tern_django.init_cache()
+    url, sha = 'http://example.com', 'nthotnhunoteh'
+    tern_django.set_url_cache(url, sha)
+    assert sha == tern_django.get_url_cache(url)
+
+
 # Cache integration with templates analyze.
 
 

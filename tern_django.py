@@ -289,13 +289,17 @@ def init_cache():
     """Create cache table if necessary."""
 
     connect()
-    database_cursor.execute("""
+    database_cursor.executescript("""
     create table if not exists tern_django (
         "id" integer primary key,
         "file_name" text unique not null,
         "mtime" real,
         "libs" text,
         "loadEagerly" text);
+    create table if not exists url_cache (
+        "id" integer primary key,
+        "url" text unique not null,
+        "sha256" text not null);
     """)
     database_connection.commit()
 
@@ -327,6 +331,27 @@ def set_cache(file_name, mtime, libs, loadEagerly):
         """
         params = (file_name, mtime, libs, loadEagerly)
     database_cursor.execute(query, params)
+    database_connection.commit()
+
+
+def get_url_cache(url):
+    """Get sha256 for file at given placed url if exists."""
+
+    database_cursor.execute("""
+    select "sha256"
+    from url_cache
+    where "url"=?;
+    """, (url,))
+    return database_cursor.fetchone()[0]
+
+
+def set_url_cache(url, sha256):
+    """Set sha256 value for file placed at given url."""
+
+    database_cursor.execute("""
+    insert into url_cache("url", "sha256")
+    values (?, ?);
+    """, (url, sha256))
     database_connection.commit()
 
 
