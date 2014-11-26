@@ -395,11 +395,12 @@ def download_library(url):
         content = response.read()
         content_hash = sha256()
         content_hash.update(content.encode())
-        file_name = content_hash.hexdigest()
-        file_path = join(storage, file_name)
+        hexdigest = content_hash.hexdigest()
+        file_path = join(storage, hexdigest)
         if not exists(file_path):
             with open(file_path, 'w') as cache_object:
                 cache_object.write(content)
+        set_url_cache(url, hexdigest)
     except URLError:
         pass
     else:

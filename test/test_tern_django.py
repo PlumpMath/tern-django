@@ -238,3 +238,15 @@ def test_skip_already_downloaded_libraries():
     url, sha = 'http://example.com', 'nthotnhunoteh'
     tern_django.set_url_cache(url, sha)
     assert sha == tern_django.download_library(url)
+
+
+def test_save_downloaded_library_hash():
+    """Check we save downloaded libraries sha256 hashes into url_cache."""
+
+    tern_django.init_cache()
+    backbone = join(fixture_dir, 'backbone.min.js')
+    backbone_url = 'http://backbonejs.org/backbone-min.js'
+    sha256 = '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825'
+    tern_django.urlopen = lambda url: open(backbone)
+    tern_django.download_library(backbone_url)
+    assert sha256 == tern_django.get_url_cache(backbone_url)
