@@ -1,26 +1,24 @@
 #!/bin/bash
 
-django_admim=$BINDIR/django-admin.py
-project_dir=$PWD/.project
-fixtures=$PWD/test/fixtures
+unset DJANGO_SETTINGS_MODULE
+unset PYTHONPATH
 
-mkdir -p $project_dir
+project=$PWD/.project
+layout=$PWD/test/layout
 
-cd $project_dir
+mkdir -p $project
 
-DJANGO_SETTINGS_MODULE= $django_admim startproject project .
+django-admin.py startproject project $project
 
-for app in app1 app2 jquery_app app_for_cache backbone_app
+for app in cached independent static_tag use_backbone use_jquery
 do
-    $django_admim startapp $app
-    mkdir -p $project_dir/$app/static/$app
-    mkdir -p $project_dir/$app/templates/$app
+    mkdir -p $project/$app
+    django-admin.py startapp $app $project/$app
 done
 
-cp -f $fixtures/settings.py $project_dir/project/settings.py
-cp -f $fixtures/app1.js $project_dir/app1/static/app1/app1.js
-cp -f $fixtures/app2.js $project_dir/app2/static/app2/app2.js
-cp -f $fixtures/app2.html $project_dir/app2/templates/app2/app2.html
-cp -f $fixtures/jquery_app.html $project_dir/jquery_app/templates/jquery_app/jquery_app.html
-cp -f $fixtures/underscore_app.html $project_dir/app_for_cache/templates/app_for_cache/underscore_app.html
-cp -f $fixtures/backbone_app.html $project_dir/backbone_app/templates/backbone_app/backbone_app.html
+for i in $(find $layout -type f)
+do
+    target=$project/${i#$layout/}
+    mkdir -p $(dirname $target)
+    cp $i $target
+done

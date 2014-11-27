@@ -16,11 +16,11 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app1',
-    'app2',
-    'jquery_app',
-    'app_for_cache',
-    'backbone_app',
+    'cached',
+    'independent',
+    'static_tag',
+    'use_backbone',
+    'use_jquery',
 )
 
 MIDDLEWARE_CLASSES = (
