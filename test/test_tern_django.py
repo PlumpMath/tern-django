@@ -65,6 +65,24 @@ def no_urlopen(monkeypatch):
     monkeypatch.setattr(tern_django, 'urlopen', raise_url_error)
 
 
+@pytest.fixture(autouse=True)
+def db_rollback(request):
+    """Rollback any db change after test execution."""
+
+    def teardown():
+        """Perform rollback action."""
+
+        if tern_django.database_cursor is not None:
+            tern_django.database_cursor.executescript("""
+            drop table if exists html_cache;
+            drop table if exists url_cache;
+            """)
+            tern_django.database_connection.commit()
+
+    request.addfinalizer(teardown)
+    tern_django.init_cache()
+
+
 # Applications.
 
 
@@ -81,7 +99,6 @@ def test_iter_django_applications():
 def test_write_tern_project(no_tern_projects):
     """Check we write tern project in django applications."""
 
-    tern_django.init_cache()
     tern_django.update_tern_projects()
     for app in tern_django.applications():
         has_static = exists(join(app, 'static'))
@@ -93,7 +110,6 @@ def test_print_processed_projects(capsys, no_tern_projects):
     """Check we print names of written tern projects."""
 
     message = 'Write tern project to {0}'.format(static_tag_app_project)
-    tern_django.init_cache()
     tern_django.update_tern_projects()
     out, err = capsys.readouterr()
     assert message in out
@@ -104,7 +120,6 @@ def test_does_not_modify_existed_files(capsys, no_tern_projects):
 
     with open(independent_app_project, 'w') as project:
         project.write(dumps(tern_django.default_tern_project))
-    tern_django.init_cache()
     tern_django.update_tern_projects()
     out, err = capsys.readouterr()
     assert independent_app_project not in out
@@ -175,7 +190,6 @@ def test_disconnect_multiple_times():
 def test_html_cache_table_operations():
     """Check we can create, read and write to html_cache table."""
 
-    tern_django.init_cache()
     html_file = '/test/file.html'
     html_args = (1415483694.061135, '["jquery"]', '')
     tern_django.set_html_cache(html_file, *html_args)
@@ -188,7 +202,6 @@ def test_html_cache_table_insert_or_update():
     if it already present.
     """
 
-    tern_django.init_cache()
     file_name = '/test/me/twice.html'
     params = (1415483694.061135, '["underscore"]', '')
     tern_django.set_html_cache(file_name, *params)
@@ -199,7 +212,6 @@ def test_html_cache_table_insert_or_update():
 def test_url_cache_table_operations():
     """Check we can create, read and write to url cache table."""
 
-    tern_django.init_cache()
     url, sha = 'http://example.com', 'nthotnhunoteh'
     tern_django.set_url_cache(url, sha)
     assert sha == tern_django.get_url_cache(url)
@@ -212,7 +224,6 @@ def test_skip_already_analyzed_template():
     """Check we will ignore templates analyzed earlier."""
 
     project = {'libs': [], 'loadEagerly': []}
-    tern_django.init_cache()
     tern_django.set_html_cache(cached_app_html, time(), '["jquery"]', '')
     tern_django.analyze_templates(project, cached_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
@@ -222,7 +233,6 @@ def test_save_analyzed_template_data():
 
     project = {'libs': [], 'loadEagerly': []}
     timestamp = time() - timedelta(hours=1).total_seconds()
-    tern_django.init_cache()
     tern_django.set_html_cache(cached_app_html, timestamp, '["jquery"]', '')
     tern_django.analyze_templates(project, cached_app)
     _, libs, _ = tern_django.get_html_cache(cached_app_html)
@@ -237,7 +247,6 @@ def test_download_external_libraries():
 
     project = {'libs': [], 'loadEagerly': []}
     tern_django.urlopen = lambda url: open(backbone_js)
-    tern_django.init_cache()
     tern_django.analyze_templates(project, use_backbone_app)
     stored_file_path = join(tern_django.storage, backbone_sha256)
     stored_file = open(stored_file_path).read()
@@ -249,7 +258,6 @@ def test_download_external_libraries():
 def test_skip_already_downloaded_libraries():
     """Check we will use cached sha256 value from cache."""
 
-    tern_django.init_cache()
     url, sha = 'http://example.com', 'nthotnhunoteh'
     tern_django.set_url_cache(url, sha)
     assert sha == tern_django.download_library(url)
@@ -258,7 +266,6 @@ def test_skip_already_downloaded_libraries():
 def test_save_downloaded_library_hash():
     """Check we save downloaded libraries sha256 hashes into url_cache."""
 
-    tern_django.init_cache()
     tern_django.urlopen = lambda url: open(backbone_js)
     tern_django.download_library(backbone_url)
     assert backbone_sha256 == tern_django.get_url_cache(backbone_url)
@@ -268,7 +275,6 @@ def test_download_library_output_format():
     """Check that we obtain same results whenever we got if from url_cache or
     download it to storage manually."""
 
-    tern_django.init_cache()
     tern_django.urlopen = lambda url: open(backbone_js)
     downloaded = tern_django.download_library(backbone_url)
     from_cache = tern_django.download_library(backbone_url)
