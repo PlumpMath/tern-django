@@ -10,10 +10,37 @@ import pytest
 import tern_django
 
 
-project_dir = join(getcwd(), '.project')
-fixture_dir = join(getcwd(), 'test', 'fixtures')
+# Stub tern_django settings.
+
+
 tern_django.database_file = join(getcwd(), 'tern-django.sqlite')
 tern_django.storage = join(getcwd(), 'tmp')
+
+
+# Constants.
+
+project = join(getcwd(), '.project')
+ext = join(getcwd(), 'test', 'ext')
+
+independent_app = join(project, 'independent')
+independent_app_project = join(independent_app, tern_django.tern_file)
+independent_app_js = join(
+    independent_app, 'static', 'independent', 'independent.js')
+
+static_tag_app = join(project, 'static_tag')
+static_tag_app_project = join(static_tag_app, tern_django.tern_file)
+
+use_jquery_app = join(project, 'use_jquery')
+
+cached_app = join(project, 'cached')
+cached_app_html = join(
+    cached_app, 'templates', 'templates', 'use_underscore.html')
+
+use_backbone_app = join(project, 'use_backbone')
+backbone_js = join(ext, 'backbone.min.js')
+backbone_url = 'http://backbonejs.org/backbone-min.js'
+backbone_sha256 = (
+    '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825')
 
 
 # Fixtures.
@@ -65,8 +92,7 @@ def test_write_tern_project(no_tern_projects):
 def test_print_processed_projects(capsys, no_tern_projects):
     """Check we print names of written tern projects."""
 
-    app2_project = join(project_dir, 'app2', tern_django.tern_file)
-    message = 'Write tern project to {0}'.format(app2_project)
+    message = 'Write tern project to {0}'.format(static_tag_app_project)
     tern_django.init_cache()
     tern_django.update_tern_projects()
     out, err = capsys.readouterr()
@@ -76,13 +102,12 @@ def test_print_processed_projects(capsys, no_tern_projects):
 def test_does_not_modify_existed_files(capsys, no_tern_projects):
     """Check we doesn't overwrite up to date tern projects."""
 
-    app1_project = join(project_dir, 'app1', tern_django.tern_file)
-    with open(app1_project, 'w') as project:
+    with open(independent_app_project, 'w') as project:
         project.write(dumps(tern_django.default_tern_project))
     tern_django.init_cache()
     tern_django.update_tern_projects()
     out, err = capsys.readouterr()
-    assert app1_project not in out
+    assert independent_app_project not in out
 
 
 # Templates analyze.
@@ -92,18 +117,15 @@ def test_find_static_files_from_other_application():
     """Check we can search in templates static files include."""
 
     project = {'libs': [], 'loadEagerly': []}
-    app1_static_file = join(project_dir, 'app1', 'static', 'app1', 'app1.js')
-    app2 = join(project_dir, 'app2')
-    tern_django.analyze_templates(project, app2)
-    assert project == {'libs': [], 'loadEagerly': [app1_static_file]}
+    tern_django.analyze_templates(project, static_tag_app)
+    assert project == {'libs': [], 'loadEagerly': [independent_app_js]}
 
 
 def test_find_static_predefined_libraries():
     """Check we can detect predefined libraries in templates files."""
 
     project = {'libs': [], 'loadEagerly': []}
-    jquery_app = join(project_dir, 'jquery_app')
-    tern_django.analyze_templates(project, jquery_app)
+    tern_django.analyze_templates(project, use_jquery_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
 
@@ -190,24 +212,20 @@ def test_skip_already_analyzed_template():
     """Check we will ignore templates analyzed earlier."""
 
     project = {'libs': [], 'loadEagerly': []}
-    app = join(project_dir, 'app_for_cache')
-    template = join(app, 'templates', 'app_for_cache', 'underscore_app.html')
     tern_django.init_cache()
-    tern_django.set_html_cache(template, time(), '["jquery"]', '')
-    tern_django.analyze_templates(project, app)
+    tern_django.set_html_cache(cached_app_html, time(), '["jquery"]', '')
+    tern_django.analyze_templates(project, cached_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
 
 def test_save_analyzed_template_data():
 
     project = {'libs': [], 'loadEagerly': []}
-    app = join(project_dir, 'app_for_cache')
-    template = join(app, 'templates', 'app_for_cache', 'underscore_app.html')
     timestamp = time() - timedelta(hours=1).total_seconds()
     tern_django.init_cache()
-    tern_django.set_html_cache(template, timestamp, '["jquery"]', '')
-    tern_django.analyze_templates(project, app)
-    _, libs, _ = tern_django.get_html_cache(template)
+    tern_django.set_html_cache(cached_app_html, timestamp, '["jquery"]', '')
+    tern_django.analyze_templates(project, cached_app)
+    _, libs, _ = tern_django.get_html_cache(cached_app_html)
     assert '["underscore"]' == libs
 
 
@@ -218,15 +236,12 @@ def test_download_external_libraries():
     """Check we can download libraries external from internet."""
 
     project = {'libs': [], 'loadEagerly': []}
-    app = join(project_dir, 'backbone_app')
-    backbone = join(fixture_dir, 'backbone.min.js')
-    sha256 = '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825'
-    tern_django.urlopen = lambda url: open(backbone)
+    tern_django.urlopen = lambda url: open(backbone_js)
     tern_django.init_cache()
-    tern_django.analyze_templates(project, app)
-    stored_file_path = join(tern_django.storage, sha256)
+    tern_django.analyze_templates(project, use_backbone_app)
+    stored_file_path = join(tern_django.storage, backbone_sha256)
     stored_file = open(stored_file_path).read()
-    fixture_file = open(backbone).read()
+    fixture_file = open(backbone_js).read()
     assert stored_file == fixture_file
     assert project == {'libs': [], 'loadEagerly': [stored_file_path]}
 
@@ -244,12 +259,9 @@ def test_save_downloaded_library_hash():
     """Check we save downloaded libraries sha256 hashes into url_cache."""
 
     tern_django.init_cache()
-    backbone = join(fixture_dir, 'backbone.min.js')
-    backbone_url = 'http://backbonejs.org/backbone-min.js'
-    sha256 = '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825'
-    tern_django.urlopen = lambda url: open(backbone)
+    tern_django.urlopen = lambda url: open(backbone_js)
     tern_django.download_library(backbone_url)
-    assert sha256 == tern_django.get_url_cache(backbone_url)
+    assert backbone_sha256 == tern_django.get_url_cache(backbone_url)
 
 
 def test_download_library_output_format():
@@ -257,9 +269,7 @@ def test_download_library_output_format():
     download it to storage manually."""
 
     tern_django.init_cache()
-    backbone = join(fixture_dir, 'backbone.min.js')
-    backbone_url = 'http://backbonejs.org/backbone-min.js'
-    tern_django.urlopen = lambda url: open(backbone)
+    tern_django.urlopen = lambda url: open(backbone_js)
     downloaded = tern_django.download_library(backbone_url)
     from_cache = tern_django.download_library(backbone_url)
     assert downloaded == from_cache
