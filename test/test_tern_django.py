@@ -1,9 +1,9 @@
 from __future__ import absolute_import
-from datetime import timedelta
+from datetime import datetime, timedelta
 from json import dumps
 from os import getcwd, unlink
 from os.path import join, exists
-from time import time
+from time import mktime
 
 import pytest
 
@@ -41,6 +41,22 @@ backbone_js = join(ext, 'backbone.min.js')
 backbone_url = 'http://backbonejs.org/backbone-min.js'
 backbone_sha256 = (
     '75d28344b1b83b5fb153fc5939bdc10b404a754d93f78f7c1c8a8b81de376825')
+
+
+# Helpers.
+
+
+def make_timestamp(**kwargs):
+    """Create timestamp.
+
+    Keyword arguments passed directly to the timedelta constructor.
+    This timedelta will be added to the datetime now.  By default
+    it will return current timestamp.
+    """
+
+    given_time = datetime.now() + timedelta(**kwargs)
+    time_tuple = given_time.timetuple()
+    return mktime(time_tuple)
 
 
 # Fixtures.
@@ -224,7 +240,8 @@ def test_skip_already_analyzed_template():
     """Check we will ignore templates analyzed earlier."""
 
     project = {'libs': [], 'loadEagerly': []}
-    tern_django.set_html_cache(cached_app_html, time(), '["jquery"]', '')
+    tern_django.set_html_cache(
+        cached_app_html, make_timestamp(), '["jquery"]', '')
     tern_django.analyze_templates(project, cached_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
@@ -232,7 +249,7 @@ def test_skip_already_analyzed_template():
 def test_save_analyzed_template_data():
 
     project = {'libs': [], 'loadEagerly': []}
-    timestamp = time() - timedelta(hours=1).total_seconds()
+    timestamp = make_timestamp(hours=-1)
     tern_django.set_html_cache(cached_app_html, timestamp, '["jquery"]', '')
     tern_django.analyze_templates(project, cached_app)
     _, libs, _ = tern_django.get_html_cache(cached_app_html)
