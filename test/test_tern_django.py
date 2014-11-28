@@ -258,9 +258,11 @@ def test_download_external_libraries():
 def test_skip_already_downloaded_libraries():
     """Check we will use cached sha256 value from cache."""
 
-    url, sha = 'http://example.com', 'nthotnhunoteh'
+    url = 'http://example.com'
+    sha = 'nthotnhunoteh'
+    stored = join(tern_django.storage, sha)
     tern_django.set_url_cache(url, sha)
-    assert sha == tern_django.download_library(url)
+    assert stored == tern_django.download_library(url)
 
 
 def test_save_downloaded_library_hash():
