@@ -34,7 +34,7 @@ use_jquery_app = join(project, 'use_jquery')
 
 cached_app = join(project, 'cached')
 cached_app_html = join(
-    cached_app, 'templates', 'templates', 'use_underscore.html')
+    cached_app, 'templates', 'cached', 'use_underscore.html')
 
 use_backbone_app = join(project, 'use_backbone')
 backbone_js = join(ext, 'backbone.min.js')
