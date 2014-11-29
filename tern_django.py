@@ -334,16 +334,21 @@ def set_html_cache(file_name, mtime, libs, loadEagerly):
 
     if get_html_cache(file_name):
         query = """
-        update html_cache set "mtime"=?, "libs"=?, "loadEagerly"=?
-        where "file_name"=?;
+        update html_cache
+        set "mtime"=:mtime, "libs"=:libs, "loadEagerly"=:loadEagerly
+        where "file_name"=:file_name;
         """
-        params = (mtime, libs, loadEagerly, file_name)
     else:
         query = """
         insert into html_cache("file_name", "mtime", "libs", "loadEagerly")
-        values (?, ?, ?, ?);
+        values (:file_name, :mtime, :libs, :loadEagerly);
         """
-        params = (file_name, mtime, libs, loadEagerly)
+    params = {
+        'file_name': file_name,
+        'mtime': mtime,
+        'libs': libs,
+        'loadEagerly': loadEagerly,
+    }
     with connection:
         connection.execute(query, params)
 
@@ -365,10 +370,17 @@ def set_url_cache(url, sha256):
     """Set sha256 value for file placed at given url."""
 
     with connection:
-        connection.execute("""
-        insert into url_cache("url", "sha256")
-        values (?, ?);
-        """, (url, sha256))
+        if get_url_cache(url):
+            query = """
+            update url_cache set "sha256"=:sha256
+            where "url"=:url;
+            """
+        else:
+            query = """
+            insert into url_cache("url", "sha256")
+            values (:url, :sha256);
+            """
+        connection.execute(query, {'url': url, 'sha256': sha256})
 
 
 # Libraries download.
