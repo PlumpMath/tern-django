@@ -1,9 +1,11 @@
-__pycache__/
-.cask/
-.project/
-.tox/
-[#]*[#]
 *.elc
+*.ipynb
 *.pyc
 *.sqlite
 *~
+.cask/
+.ipynb_checkpoints/
+.project/
+.tox/
+[#]*[#]
+__pycache__/
