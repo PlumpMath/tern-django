@@ -292,30 +292,30 @@ def init_cache():
     """Create cache tables if necessary."""
 
     connect()
-    connection.executescript("""
-    create table if not exists html_cache (
-        "id" integer primary key,
-        "file_name" text unique not null,
-        "mtime" real,
-        "libs" text,
-        "loadEagerly" text);
-    create table if not exists url_cache (
-        "id" integer primary key,
-        "url" text unique not null,
-        "sha256" text not null);
-    """)
-    connection.commit()
+    with connection:
+        connection.executescript("""
+        create table if not exists html_cache (
+            "id" integer primary key,
+            "file_name" text unique not null,
+            "mtime" real,
+            "libs" text,
+            "loadEagerly" text);
+        create table if not exists url_cache (
+            "id" integer primary key,
+            "url" text unique not null,
+            "sha256" text not null);
+        """)
 
 
 def drop_cache():
     """Drop cache tables if necessary."""
 
     connect()
-    connection.executescript("""
-    drop table if exists html_cache;
-    drop table if exists url_cache;
-    """)
-    connection.commit()
+    with connection:
+        connection.executescript("""
+        drop table if exists html_cache;
+        drop table if exists url_cache;
+        """)
 
 
 def get_html_cache(file_name):
@@ -344,8 +344,8 @@ def set_html_cache(file_name, mtime, libs, loadEagerly):
         values (?, ?, ?, ?);
         """
         params = (file_name, mtime, libs, loadEagerly)
-    connection.execute(query, params)
-    connection.commit()
+    with connection:
+        connection.execute(query, params)
 
 
 def get_url_cache(url):
@@ -364,11 +364,11 @@ def get_url_cache(url):
 def set_url_cache(url, sha256):
     """Set sha256 value for file placed at given url."""
 
-    connection.execute("""
-    insert into url_cache("url", "sha256")
-    values (?, ?);
-    """, (url, sha256))
-    connection.commit()
+    with connection:
+        connection.execute("""
+        insert into url_cache("url", "sha256")
+        values (?, ?);
+        """, (url, sha256))
 
 
 # Libraries download.
