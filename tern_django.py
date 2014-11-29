@@ -296,7 +296,7 @@ def disconnect():
 
 
 def init_cache():
-    """Create cache table if necessary."""
+    """Create cache tables if necessary."""
 
     connect()
     database_cursor.executescript("""
@@ -310,6 +310,17 @@ def init_cache():
         "id" integer primary key,
         "url" text unique not null,
         "sha256" text not null);
+    """)
+    database_connection.commit()
+
+
+def drop_cache():
+    """Drop cache tables if necessary."""
+
+    connect()
+    database_cursor.executescript("""
+    drop table if exists html_cache;
+    drop table if exists url_cache;
     """)
     database_connection.commit()
 

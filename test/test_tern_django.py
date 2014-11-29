@@ -85,17 +85,7 @@ def no_urlopen(monkeypatch):
 def db_rollback(request):
     """Rollback any db change after test execution."""
 
-    def teardown():
-        """Perform rollback action."""
-
-        if tern_django.database_cursor is not None:
-            tern_django.database_cursor.executescript("""
-            drop table if exists html_cache;
-            drop table if exists url_cache;
-            """)
-            tern_django.database_connection.commit()
-
-    request.addfinalizer(teardown)
+    request.addfinalizer(tern_django.drop_cache)
     tern_django.init_cache()
 
 
