@@ -268,38 +268,31 @@ def needs_to_be_rendered(template):
 
 
 database_file = expanduser('~/.emacs.d/tern-django.sqlite')
-database_connection = None
-database_cursor = None
+connection = None
 
 
 def connect():
     """Connect to cache database."""
 
-    global database_connection
-    global database_cursor
-    if database_connection is None or database_cursor is None:
-        database_connection = sqlite3.connect(database_file)
-        database_cursor = database_connection.cursor()
+    global connection
+    if connection is None:
+        connection = sqlite3.connect(database_file)
 
 
 def disconnect():
     """Disconnect from cache database."""
 
-    global database_connection
-    global database_cursor
-    if database_cursor is not None:
-        database_cursor.close()
-    if database_connection is not None:
-        database_connection.close()
-    database_connection = None
-    database_cursor = None
+    global connection
+    if connection is not None:
+        connection.close()
+    connection = None
 
 
 def init_cache():
     """Create cache tables if necessary."""
 
     connect()
-    database_cursor.executescript("""
+    connection.executescript("""
     create table if not exists html_cache (
         "id" integer primary key,
         "file_name" text unique not null,
@@ -311,29 +304,29 @@ def init_cache():
         "url" text unique not null,
         "sha256" text not null);
     """)
-    database_connection.commit()
+    connection.commit()
 
 
 def drop_cache():
     """Drop cache tables if necessary."""
 
     connect()
-    database_cursor.executescript("""
+    connection.executescript("""
     drop table if exists html_cache;
     drop table if exists url_cache;
     """)
-    database_connection.commit()
+    connection.commit()
 
 
 def get_html_cache(file_name):
     """Get file name attributes from cache if exists."""
 
-    database_cursor.execute("""
+    cursor = connection.execute("""
     select "mtime", "libs", "loadEagerly"
     from html_cache
     where file_name=?;
     """, (file_name,))
-    return database_cursor.fetchone()
+    return cursor.fetchone()
 
 
 def set_html_cache(file_name, mtime, libs, loadEagerly):
@@ -351,19 +344,19 @@ def set_html_cache(file_name, mtime, libs, loadEagerly):
         values (?, ?, ?, ?);
         """
         params = (file_name, mtime, libs, loadEagerly)
-    database_cursor.execute(query, params)
-    database_connection.commit()
+    connection.execute(query, params)
+    connection.commit()
 
 
 def get_url_cache(url):
     """Get sha256 for file at given placed url if exists."""
 
-    database_cursor.execute("""
+    cursor = connection.execute("""
     select "sha256"
     from url_cache
     where "url"=?;
     """, (url,))
-    received = database_cursor.fetchone()
+    received = cursor.fetchone()
     if received:
         return received[0]
 
@@ -371,11 +364,11 @@ def get_url_cache(url):
 def set_url_cache(url, sha256):
     """Set sha256 value for file placed at given url."""
 
-    database_cursor.execute("""
+    connection.execute("""
     insert into url_cache("url", "sha256")
     values (?, ?);
     """, (url, sha256))
-    database_connection.commit()
+    connection.commit()
 
 
 # Libraries download.

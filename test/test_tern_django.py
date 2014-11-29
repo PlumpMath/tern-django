@@ -178,9 +178,9 @@ def test_connect_multiple_times():
     """Check that we can safely connect and disconnect to the cache."""
 
     tern_django.connect()
-    one = tern_django.database_cursor
+    one = tern_django.connection
     tern_django.connect()
-    two = tern_django.database_cursor
+    two = tern_django.connection
     assert one is two
 
 
@@ -189,8 +189,7 @@ def test_disconnect_multiple_times():
 
     tern_django.disconnect()
     tern_django.disconnect()
-    assert not tern_django.database_connection
-    assert not tern_django.database_cursor
+    assert not tern_django.connection
 
 
 def test_html_cache_table_operations():
