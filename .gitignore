@@ -2,7 +2,6 @@ __pycache__/
 .cask/
 .project/
 .tox/
-tmp/
 [#]*[#]
 *.elc
 *.pyc

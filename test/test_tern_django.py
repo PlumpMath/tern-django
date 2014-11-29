@@ -14,10 +14,10 @@ import tern_django
 
 
 tern_django.database_file = join(getcwd(), 'tern-django.sqlite')
-tern_django.storage = join(getcwd(), 'tmp')
 
 
 # Constants.
+
 
 project = join(getcwd(), '.project')
 ext = join(getcwd(), 'test', 'ext')
@@ -87,6 +87,13 @@ def db_rollback(request):
 
     request.addfinalizer(tern_django.drop_cache)
     tern_django.init_cache()
+
+
+@pytest.fixture(autouse=True)
+def random_storage(tmpdir, monkeypatch):
+    """Chose storage directory randomly for each test."""
+
+    monkeypatch.setattr(tern_django, 'storage', tmpdir.strpath)
 
 
 # Applications.
@@ -267,6 +274,7 @@ def test_skip_already_downloaded_libraries():
     url = 'http://example.com'
     sha = 'nthotnhunoteh'
     stored = join(tern_django.storage, sha)
+    open(stored, 'a').close()   # Touch a file.
     tern_django.set_url_cache(url, sha)
     assert stored == tern_django.download_library(url)
 
@@ -287,3 +295,14 @@ def test_download_library_output_format():
     downloaded = tern_django.download_library(backbone_url)
     from_cache = tern_django.download_library(backbone_url)
     assert downloaded == from_cache
+
+
+def test_download_library_ignore_cached_results_missed_from_storage():
+    """Check that we will download libraries missed from storage even if we
+    got cached results for it."""
+
+    tern_django.set_url_cache(backbone_url, 'is-not-really-a-file')
+    tern_django.urlopen = lambda url: open(backbone_js)
+    tern_django.download_library(backbone_url)
+    assert exists(join(tern_django.storage, backbone_sha256))
+    assert backbone_sha256 == tern_django.get_url_cache(backbone_url)

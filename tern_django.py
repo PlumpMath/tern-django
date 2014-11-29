@@ -403,7 +403,9 @@ def download_library(url):
 
     cached = get_url_cache(url)
     if cached:
-        return join(storage, cached)
+        stored_library = join(storage, cached)
+        if exists(stored_library):
+            return stored_library
 
     try:
         create_storage()
