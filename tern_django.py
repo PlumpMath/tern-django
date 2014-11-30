@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import atexit
 import copy
 import sqlite3
 from hashlib import sha256
@@ -41,7 +40,6 @@ def run_tern_django():
     Basically program entry point.
     """
 
-    atexit.register(disconnect)
     init_cache()
     update_tern_projects()
 
