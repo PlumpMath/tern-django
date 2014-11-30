@@ -9,6 +9,7 @@ try:
 except ImportError:
     from HTMLParser import HTMLParser, HTMLParseError
 from json import dumps, loads
+from multiprocessing import Pool, cpu_count
 from os import makedirs, walk
 from os.path import (
     abspath, basename, dirname, exists, expanduser, getmtime, join)
@@ -44,12 +45,19 @@ def run_tern_django():
     update_tern_projects()
 
 
+def initialize():
+    """Initialize django applications."""
+
+    if django_version >= '1.7':
+        django.setup()
+
+
 def applications():
     """Collect directories with django applications."""
 
+    initialize()
     if django_version >= '1.7':
         from django.apps import apps
-        django.setup()
         return [app.path for app in apps.get_app_configs()]
     else:
         from django.utils.importlib import import_module
@@ -69,13 +77,18 @@ def applications():
 def update_tern_projects():
     """Update tern projects in each django application."""
 
-    for app in applications():
-        update_application(app)
+    pool = Pool(processes=cpu_count() * 2)
+    try:
+        pool.map(update_application, applications())
+    finally:
+        pool.close()
+        pool.join()
 
 
 def update_application(app):
     """Update tern project in specified django application."""
 
+    initialize()                # One more time for child process.
     static = join(app, 'static')
     if exists(static):
         project_file = join(app, tern_file)
