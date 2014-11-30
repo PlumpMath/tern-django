@@ -123,7 +123,7 @@ def test_print_processed_projects(capsys, no_tern_projects):
     """Check we print names of written tern projects."""
 
     message = 'Write tern project to {0}'.format(static_tag_app_project)
-    tern_django.update_tern_projects()
+    tern_django.update_application(static_tag_app)
     out, err = capsys.readouterr()
     assert message in out
 
