@@ -177,26 +177,8 @@ def test_needs_to_be_rendered():
 def test_create_cache_file():
     """Check we create database file."""
 
-    tern_django.connect()
-    assert exists(tern_django.database_file)
-
-
-def test_connect_multiple_times():
-    """Check that we can safely connect and disconnect to the cache."""
-
-    tern_django.connect()
-    one = tern_django.connection
-    tern_django.connect()
-    two = tern_django.connection
-    assert one is two
-
-
-def test_disconnect_multiple_times():
-    """Check we can safely disconnect from cache many times."""
-
-    tern_django.disconnect()
-    tern_django.disconnect()
-    assert not tern_django.connection
+    with tern_django.Cache():
+        assert exists(tern_django.database_file)
 
 
 def test_html_cache_table_operations():
