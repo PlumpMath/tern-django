@@ -36,6 +36,8 @@ cached_app = join(project, 'cached')
 cached_app_html = join(
     cached_app, 'templates', 'cached', 'use_underscore.html')
 
+bad_src = join(project, 'bad_src')
+
 use_backbone_app = join(project, 'use_backbone')
 backbone_js = join(ext, 'backbone.min.js')
 backbone_url = 'http://backbonejs.org/backbone-min.js'
@@ -155,6 +157,14 @@ def test_find_static_predefined_libraries():
     project = {'libs': [], 'loadEagerly': []}
     tern_django.analyze_templates(project, use_jquery_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
+
+
+def test_skip_inline_script_tags():
+    """Ignore inline html script tags."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    tern_django.analyze_templates(project, bad_src)
+    assert project == {'libs': [], 'loadEagerly': []}
 
 
 def test_meaningful_template():

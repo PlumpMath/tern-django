@@ -21,6 +21,7 @@ INSTALLED_APPS = (
     'static_tag',
     'use_backbone',
     'use_jquery',
+    'bad_src',
 )
 
 MIDDLEWARE_CLASSES = (

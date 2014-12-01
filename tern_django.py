@@ -24,6 +24,8 @@ except ImportError:
 
 import django
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.template import Template, Context
 
 
@@ -251,15 +253,27 @@ class TemplateAnalyzer(object):
     def process_absolute_url(self, url):
         """Find external library.  Download if needed."""
 
-        scheme, netloc, path, query, fragment = urlsplit(url)
-        base = basename(path)
-        for lib in ['jquery', 'underscore']:
-            if base.startswith(lib):
-                self.libs.append(lib)
-                break
+        if self.validate_absolute_url(url):
+            scheme, netloc, path, query, fragment = urlsplit(url)
+            base = basename(path)
+            for lib in ['jquery', 'underscore']:
+                if base.startswith(lib):
+                    self.libs.append(lib)
+                    break
+            else:
+                stored_lib = download_library(url)
+                self.loadEagerly.append(stored_lib)
+
+    def validate_absolute_url(self, url):
+        """Check that url formed correctly."""
+
+        validator = URLValidator()
+        try:
+            validator(url)
+        except ValidationError:
+            pass
         else:
-            stored_lib = download_library(url)
-            self.loadEagerly.append(stored_lib)
+            return True
 
 
 def meaningful_template(template):
