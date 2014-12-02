@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import copy
+import re
 import sqlite3
 from hashlib import sha256
 try:
@@ -173,7 +174,7 @@ def set_template_cache(html_file, libs, load_eagerly):
 def parse_template(source, app):
     """Parse html source string.  Save information in the project."""
 
-    rendered_source = render_if_necessary(source)
+    rendered_source = render_template_if_necessary(source)
     try:
         parser = TemplateParser()
         # Don't move this to TemplateParser init.  Super will not
@@ -185,18 +186,6 @@ def parse_template(source, app):
     analyzer = TemplateAnalyzer(app, parser.src)
     analyzer.find()
     return analyzer.libs, analyzer.loadEagerly
-
-
-def render_if_necessary(source):
-    """Render django template if necessary."""
-
-    if needs_to_be_rendered(source):
-        source_template = Template(source)
-        source_context = Context({})
-        rendered_source = source_template.render(source_context)
-        return rendered_source
-    else:
-        return source
 
 
 class TemplateParser(HTMLParser):
@@ -281,6 +270,43 @@ def meaningful_template(template):
 
     # Don't close first script tag here.
     return '<script' in template and '</script>' in template
+
+
+# Template rendering.
+
+
+template_tag_regex = re.compile(r'{%.*%}|{{.*}}|{#.*#}')
+static_tag_regex = re.compile(r'{%\s*static\s*.*\s*%}')
+
+
+def render_template_if_necessary(source):
+    """Render django template if necessary."""
+
+    if needs_to_be_rendered(source):
+        rendered_source = template_tag_regex.sub(render_node, source)
+        return rendered_source
+    else:
+        return source
+
+
+def render_node(node):
+    """Render one template node.
+    Templates node has represented by regex match objects.
+    We have interest in static template tags only so we will omit other tags.
+    """
+
+    token = node.group(0)
+    if static_tag_regex.match(token):
+        template = Template('{% load staticfiles %}' + token)
+        context = Context({})
+        try:
+            rendered = template.render(context)
+        except Exception:
+            return ''               # Ignore any rendering error.
+        else:
+            return rendered
+    else:
+        return ''               # Ignore any other tags.
 
 
 def needs_to_be_rendered(template):

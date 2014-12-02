@@ -36,9 +36,12 @@ cached_app = join(project, 'cached')
 cached_app_html = join(
     cached_app, 'templates', 'cached', 'use_underscore.html')
 
-bad_src = join(project, 'bad_src')
+bad_src_app = join(project, 'bad_src')
+
+rendering_app = join(project, 'rendering')
 
 use_backbone_app = join(project, 'use_backbone')
+
 backbone_js = join(ext, 'backbone.min.js')
 backbone_url = 'http://backbonejs.org/backbone-min.js'
 backbone_sha256 = (
@@ -163,7 +166,7 @@ def test_skip_inline_script_tags():
     """Ignore inline html script tags."""
 
     project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, bad_src)
+    tern_django.analyze_templates(project, bad_src_app)
     assert project == {'libs': [], 'loadEagerly': []}
 
 
@@ -179,6 +182,14 @@ def test_needs_to_be_rendered():
 
     assert tern_django.needs_to_be_rendered('<h1>{% load staticfiles %}</h1>')
     assert not tern_django.needs_to_be_rendered('<body></body>')
+
+
+def test_template_rendering():
+    """Test we can render any template."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    tern_django.analyze_templates(project, rendering_app)
+    assert project == {'libs': [], 'loadEagerly': [independent_app_js]}
 
 
 # Sql cache.
