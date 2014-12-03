@@ -41,6 +41,8 @@ bad_src_app = join(project, 'bad_src')
 rendering_app = join(project, 'rendering')
 
 use_backbone_app = join(project, 'use_backbone')
+use_backbone_app_html = join(
+    use_backbone_app, 'templates', 'use_backbone', 'use_backbone.html')
 
 backbone_js = join(ext, 'backbone.min.js')
 backbone_url = 'http://backbonejs.org/backbone-min.js'
@@ -253,6 +255,16 @@ def test_save_analyzed_template_data():
     tern_django.analyze_templates(project, cached_app)
     _, libs, _ = tern_django.get_html_cache(cached_app_html)
     assert '["underscore"]' == libs
+
+
+def test_skip_caching_template_on_download_error():
+    """We must ignore any template caching if we fail to download
+    its libraries."""
+
+    project = {'libs': [], 'loadEagerly': []}
+    tern_django.analyze_templates(project, use_backbone_app)
+    cached = tern_django.get_html_cache(use_backbone_app_html)
+    assert not cached
 
 
 # Libraries download.

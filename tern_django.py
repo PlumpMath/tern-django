@@ -145,7 +145,10 @@ def process_html_template(project, html, app):
         with open(html) as template:
             source = template.read()
         if meaningful_template(source):
-            libs, load_eagerly = parse_template(source, app)
+            try:
+                libs, load_eagerly = parse_template(source, app)
+            except URLError:
+                return          # Fail to download external library.
         set_template_cache(html, libs, load_eagerly)
     project['libs'].extend(libs)
     project['loadEagerly'].extend(load_eagerly)
@@ -462,22 +465,25 @@ def download_library(url):
         if exists(stored_library):
             return stored_library
 
-    try:
-        create_storage()
-        response = urlopen(url)
-        content = response.read()
-        content_hash = sha256()
-        content_hash.update(content.encode())
-        hexdigest = content_hash.hexdigest()
-        file_path = join(storage, hexdigest)
-        if not exists(file_path):
-            with open(file_path, 'w') as cache_object:
-                cache_object.write(content)
-        set_url_cache(url, hexdigest)
-    except URLError:
-        pass
-    else:
-        return file_path
+    create_storage()
+    response = urlopen(url)
+    content = response.read()
+    hexdigest = content_hash(content)
+    file_path = join(storage, hexdigest)
+    if not exists(file_path):
+        with open(file_path, 'w') as cache_file:
+            cache_file.write(content)
+    set_url_cache(url, hexdigest)
+    return file_path
+
+
+def content_hash(content):
+    """Count sha256 hash for content."""
+
+    content_hash = sha256()
+    content_hash.update(content.encode())
+    hexdigest = content_hash.hexdigest()
+    return hexdigest
 
 
 if __name__ == '__main__':
