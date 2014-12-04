@@ -4,6 +4,7 @@ from __future__ import print_function
 import copy
 import re
 import sqlite3
+import traceback
 from hashlib import sha256
 try:
     from html.parser import HTMLParser, HTMLParseError
@@ -91,13 +92,18 @@ def update_tern_projects():
 def update_application(app):
     """Update tern project in specified django application."""
 
-    initialize()                # One more time for child process.
-    static = join(app, 'static')
-    if exists(static):
-        project_file = join(app, tern_file)
-        tern_project = copy.deepcopy(default_tern_project)
-        analyze_templates(tern_project, app)
-        save_tern_project(tern_project, project_file)
+    try:
+        initialize()                # One more time for child process.
+        static = join(app, 'static')
+        if exists(static):
+            project_file = join(app, tern_file)
+            tern_project = copy.deepcopy(default_tern_project)
+            analyze_templates(tern_project, app)
+            save_tern_project(tern_project, project_file)
+    except Exception as error:
+        traceback.print_exc()
+        print()
+        raise error
 
 
 def save_tern_project(tern_project, project_file):
