@@ -2,6 +2,10 @@
     :target: https://travis-ci.org/proofit404/tern-django
     :alt: Build Status
 
+.. |coveralls| image:: https://coveralls.io/repos/proofit404/tern-django/badge.png
+    :target: https://coveralls.io/r/proofit404/tern-django
+    :alt: Coverage Status
+
 ====================
 Tern Django |travis|
 ====================
