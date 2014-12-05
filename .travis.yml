@@ -13,8 +13,12 @@ before_install:
 
 install:
   - cask install
-  - pip install tox
+  - pip install tox git+https://github.com/coagulant/coveralls-python.git coveralls-merge
 
 script:
   - cask exec ert-runner
   - tox
+
+after_success:
+  - coveralls --output=python-coveralls.json
+  - coveralls-merge emacs-coveralls.json python-coveralls.json

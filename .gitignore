@@ -1,9 +1,11 @@
+*-coveralls.json
 *.elc
 *.ipynb
 *.pyc
 *.sqlite
 *~
 .cask/
+.coverage
 .ipynb_checkpoints/
 .project/
 .tox/
