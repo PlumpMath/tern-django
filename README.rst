@@ -6,9 +6,9 @@
     :target: https://coveralls.io/r/proofit404/tern-django
     :alt: Coverage Status
 
-====================
-Tern Django |travis|
-====================
+================================
+Tern Django |travis| |coveralls|
+================================
 
 Create tern projects for django applications.
 
