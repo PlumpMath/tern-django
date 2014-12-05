@@ -144,6 +144,7 @@ def process_html_template(project, html, app):
 
     libs = []
     load_eagerly = []
+    print('Process template: {0}'.format(html))
     cached = get_template_cache(html)
     if cached:
         libs, load_eagerly = cached
@@ -472,7 +473,13 @@ def download_library(url):
             return stored_library
 
     create_storage()
-    response = urlopen(url)
+    try:
+        response = urlopen(url)
+    except URLError:
+        print('Fail to download external library: {0}'.format(url))
+        raise
+    else:
+        print('Download external library: {0}'.format(url))
     content = response.read()
     hexdigest = content_hash(content)
     file_path = join(storage, hexdigest)
