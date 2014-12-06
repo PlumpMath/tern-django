@@ -58,13 +58,6 @@
   (and tern-django-process
        (process-live-p tern-django-process)))
 
-(defun tern-django-process-sentinel (process event)
-  "Check `tern-django' exit code.
-Show PROCESS output buffer if any error has occurred.
-EVENT argument is ignored."
-  (unless (zerop (process-exit-status process))
-    (pop-to-buffer tern-django-buffer)))
-
 (defun tern-django-bootstrap ()
   "Start `tern-django' python script."
   (when (tern-django-p)
@@ -77,8 +70,7 @@ EVENT argument is ignored."
                            tern-django-buffer
                            (tern-django-python)
                            tern-django-script))
-      (set-process-sentinel tern-django-process
-                            'tern-django-process-sentinel))))
+      (pop-to-buffer tern-django-buffer))))
 
 (defun tern-django-terminate ()
   "Terminate `tern-django' python script."

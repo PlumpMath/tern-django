@@ -14,14 +14,6 @@
          ,@body
        (tern-django-terminate))))
 
-(defun wait-for-tern-django ()
-  "Helper function waiting for `tern-django' process to finish."
-  (while (tern-django-running-p)
-    (accept-process-output tern-django-process))
-  (funcall (process-sentinel tern-django-process)
-           tern-django-process
-           "finished\n"))
-
 (ert-deftest test-tern-django-run-command ()
   "Check we can run `tern-django' python script."
   (with-django-settings
@@ -43,13 +35,12 @@
      (tern-django)
      (should (equal "cat" (car (process-command tern-django-process)))))))
 
-(ert-deftest test-tern-django-show-process-buffer-on-error ()
-  "Check if `tern-django' show process output buffer on any error."
+(ert-deftest test-tern-django-show-process-buffer ()
+  "Check if `tern-django' show process output buffer."
   (with-django-settings
-   (let ((tern-django-script "does_not_exist.py"))
+   (let ((tern-django-script "-i"))
      (tern-django)
-     (wait-for-tern-django)
-     (should (equal "*tern-django*" (buffer-name))))))
+     (should (equal tern-django-buffer (buffer-name))))))
 
 (ert-deftest test-tern-django-clean-output-buffer-for-each-run ()
   "Check that each `tern-django' script runs buffer contain its own output only."
@@ -59,7 +50,6 @@
        (erase-buffer)
        (insert "Trash content...")
        (tern-django)
-       (wait-for-tern-django)
        (goto-char (point-min))
        (should-not (looking-at-p "Trash content..."))))))
 
