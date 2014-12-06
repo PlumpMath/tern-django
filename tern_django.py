@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+import logging
+import multiprocessing
 import re
 import sqlite3
-import traceback
+import sys
 from hashlib import sha256
 try:
     from html.parser import HTMLParser, HTMLParseError
 except ImportError:
     from HTMLParser import HTMLParser, HTMLParseError
 from json import dumps, loads
-from multiprocessing import Pool, cpu_count
 from os import makedirs, walk
 from os.path import (
     abspath, basename, dirname, exists, expanduser, getmtime, join)
@@ -30,6 +30,8 @@ from django.core.validators import URLValidator
 from django.template import Template, Context
 
 
+logger = multiprocessing.get_logger()
+
 django_version = django.get_version()
 tern_file = '.tern-project'
 
@@ -44,8 +46,18 @@ def run_tern_django():
     Basically program entry point.
     """
 
+    init_logging()
     init_cache()
     update_tern_projects()
+
+
+def init_logging():
+    """Initialize logging system."""
+
+    debug = '--debug' in sys.argv
+    level = logging.DEBUG if debug else logging.INFO
+    multiprocessing.log_to_stderr()
+    logger.setLevel(level)
 
 
 def initialize():
@@ -80,7 +92,7 @@ def applications():
 def update_tern_projects():
     """Update tern projects in each django application."""
 
-    pool = Pool(processes=cpu_count() * 2)
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() * 2)
     try:
         pool.map(update_application, applications())
     finally:
@@ -102,9 +114,8 @@ def update_application(app):
                 templates_tern_project)
             save_tern_project(tern_project, project_file)
     except Exception as error:
-        traceback.print_exc()
-        print()
-        raise error
+        logger.exception('Unexpected error occurs: %s', error)
+        raise
 
 
 def merge_projects(*projects):
@@ -131,7 +142,7 @@ def save_tern_project(tern_project, project_file):
 def write_tern_project(tern_project, project_file):
     """Save tern project."""
 
-    print('Write tern project to', project_file)
+    logger.info('Write tern project to %s', project_file)
     with open(project_file, 'w') as project:
         project.write(dumps(tern_project))
 
@@ -154,7 +165,7 @@ def analyze_templates(app):
 def process_html_template(html, app):
     """Grab static files from html template."""
 
-    print('Process template: {0}'.format(html))
+    logger.debug('Process template: {0}'.format(html))
 
     cached = get_template_cache(html)
     if cached:
@@ -492,10 +503,10 @@ def download_library(url):
     try:
         response = urlopen(url)
     except URLError:
-        print('Fail to download external library: {0}'.format(url))
+        logger.error('Fail to download external library: %s', url)
         raise
     else:
-        print('Download external library: {0}'.format(url))
+        logger.info('Download external library: %s', url)
     content = response.read()
     hexdigest = content_hash(content)
     file_path = join(storage, hexdigest)

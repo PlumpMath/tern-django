@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from datetime import datetime, timedelta
 from json import dumps
 from os import getcwd, unlink
@@ -126,29 +125,6 @@ def test_write_tern_project(no_tern_projects):
         has_static = exists(join(app, 'static'))
         has_tern = exists(join(app, tern_django.tern_file))
         assert has_static == has_tern
-
-
-def test_print_processed_projects(capsys, no_tern_projects):
-    """Check we print names of written tern projects."""
-
-    message = 'Write tern project to {0}'.format(static_tag_app_project)
-    tern_django.update_application(static_tag_app)
-    out, err = capsys.readouterr()
-    assert message in out
-
-
-def test_output_full_traceback_of_child_process(capsys, monkeypatch):
-    """Check we'll output tracebacks occurred in children subprocess."""
-
-    def mock_analyze_templates(*args, **kwargs):
-        raise UnicodeError('Mocked.')
-    monkeypatch.setattr(tern_django, 'analyze_templates',
-                        mock_analyze_templates)
-    with pytest.raises(UnicodeError):
-        tern_django.update_application(static_tag_app)
-    out, err = capsys.readouterr()
-    assert err.startswith('Traceback')
-    assert "UnicodeError('Mocked.')" in err
 
 
 def test_does_not_modify_existed_files(capsys, no_tern_projects):
