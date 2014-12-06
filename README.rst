@@ -10,51 +10,51 @@
 Tern Django |travis| |coveralls|
 ================================
 
-Create tern projects for django applications.
+Create Tern_ projects for Django_ applications.
 
-Obviously all JavaScript code of application stored in application
-static folder.  So we can write standard .tern-project file into
-each application root.  We can add custom JavaScript from templates
-script html tags.  We can extend default "libs", "loadEagerly" and
-"plugins" settings.  Also if template use external library from
-internet we can download it to temporary folder and make it
+Use awesome Tern_ auto-complete to develop your Django_ project with
+zero configuration.
+
+Obviously all javascript code of application stored in application
+static folder.  So we can write standard ``.tern-project`` file into
+application root if static folder exists.  We can extend this project
+looking into application templates.  We can add javascript from other
+applications or download external library from internet and make it
 accessible for tern.
-
-``tern-django`` command do following:
-
-* Check if DJANGO_SETTINGS_MODULE was specified
-* Run python script in the background
-* Parse each template file in each application folder
-* Find specified static files in the script html tags
-* Save processed result in sqlite3 database
-* Write .tern-project file for each application if necessary
 
 Installation
 ------------
 
-You can install this package from Melpa:
+You can install Emacs package from Melpa_:
 ::
 
     M-x package-install RET tern-django RET
 
+Or you can install python script only from Pypi_:
+::
+
+    pip install tern-django
+
 Usage
 -----
 
-Drop following line into your .emacs file:
-
-.. code:: lisp
-
-    (add-hook 'after-save-hook 'tern-django)
-
-Setup your project variables:
+Setup your project variables and run ``tern-django`` command:
 ::
 
     M-x setenv RET DJANGO_SETTINGS_MODULE RET project.settings
     M-x setenv RET PYTHONPATH RET /home/user/path/to/project/
+    M-x tern-django
 
-When you save any file all tern projects will be updated to the
-most resent changes in your project.  Only one process running at
-the time.  So first run for newly specified project will take some
-time.  But next run will be much faster because ``tern-django`` saves
-processed result for future reuse.  You can safely ignore both tern
-projects and tern ports files in you VCS.
+In case you install it as python package activate your development
+environment and run ``tern_django.py`` script.
+::
+
+    . /path/to/project/virtual_env/bin/activate
+    export DJANGO_SETTINGS_MODULE=project.settings
+    export PYTHONPATH=/path/to/project
+    tern_django.py
+
+.. _Tern: http://ternjs.net
+.. _Django: https://www.djangoproject.com
+.. _Melpa: http://melpa.org
+.. _Pypi: https://pypi.python.org/pypi
