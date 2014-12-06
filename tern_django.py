@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import copy
 import re
 import sqlite3
 import traceback
@@ -35,8 +34,8 @@ django_version = django.get_version()
 tern_file = '.tern-project'
 
 default_tern_project = {
+    'libs': ['browser', 'ecma5'],
     'loadEagerly': ['static/**/*.js'],
-    'libs': ['browser', 'ecma5']
 }
 
 
@@ -97,13 +96,24 @@ def update_application(app):
         static = join(app, 'static')
         if exists(static):
             project_file = join(app, tern_file)
-            tern_project = copy.deepcopy(default_tern_project)
-            analyze_templates(tern_project, app)
+            templates_tern_project = analyze_templates(app)
+            tern_project = merge_projects(
+                default_tern_project,
+                templates_tern_project)
             save_tern_project(tern_project, project_file)
     except Exception as error:
         traceback.print_exc()
         print()
         raise error
+
+
+def merge_projects(*projects):
+    """Merge non empty projects all together."""
+
+    non_empty = list(filter(None, projects))  # We need list to reuse it.
+    keys = {k for project in non_empty for k in project}
+    return {k: list({v for project in non_empty for v in project[k]})
+            for k in keys}
 
 
 def save_tern_project(tern_project, project_file):
@@ -129,36 +139,42 @@ def write_tern_project(tern_project, project_file):
 # Templates analyze.
 
 
-def analyze_templates(project, app):
+def analyze_templates(app):
     """Add to project properties grabbed from app templates."""
 
+    projects = []
     templates = join(app, 'templates')
     for root, dirs, files in walk(templates):
         htmls = [join(root, f) for f in files if f.endswith('.html')]
         for html in htmls:
-            process_html_template(project, html, app)
+            projects.append(process_html_template(html, app))
+    return merge_projects(*projects)
 
 
-def process_html_template(project, html, app):
+def process_html_template(html, app):
     """Grab static files from html template."""
 
-    libs = []
-    load_eagerly = []
     print('Process template: {0}'.format(html))
+
     cached = get_template_cache(html)
     if cached:
-        libs, load_eagerly = cached
+        libs, loadEagerly = cached
+        return {'libs': libs, 'loadEagerly': loadEagerly}
+
+    with open(html, 'rb') as template:
+        source = template.read().decode(settings.FILE_CHARSET)
+
+    if not meaningful_template(source):
+        set_template_cache(html)
+        return
+
+    try:
+        libs, loadEagerly = parse_template(source, app)
+    except URLError:
+        pass                    # Fail to download external library.
     else:
-        with open(html, 'rb') as template:
-            source = template.read().decode(settings.FILE_CHARSET)
-        if meaningful_template(source):
-            try:
-                libs, load_eagerly = parse_template(source, app)
-            except URLError:
-                return          # Fail to download external library.
-        set_template_cache(html, libs, load_eagerly)
-    project['libs'].extend(libs)
-    project['loadEagerly'].extend(load_eagerly)
+        set_template_cache(html, libs, loadEagerly)
+        return {'libs': libs, 'loadEagerly': loadEagerly}
 
 
 def get_template_cache(html_file):
@@ -170,15 +186,15 @@ def get_template_cache(html_file):
         mtime = getmtime(html_file)
         if mtime < cache_mtime:
             libs = loads(cache_libs) if cache_libs else []
-            load_eagerly = loads(cache_eagerly) if cache_eagerly else []
-            return libs, load_eagerly
+            loadEagerly = loads(cache_eagerly) if cache_eagerly else []
+            return libs, loadEagerly
 
 
-def set_template_cache(html_file, libs, load_eagerly):
+def set_template_cache(html_file, libs=None, loadEagerly=None):
     """Save html file information into database cache."""
 
     mtime = getmtime(html_file)
-    set_html_cache(html_file, mtime, dumps(libs), dumps(load_eagerly))
+    set_html_cache(html_file, mtime, dumps(libs), dumps(loadEagerly))
 
 
 def parse_template(source, app):

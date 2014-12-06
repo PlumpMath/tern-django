@@ -167,24 +167,21 @@ def test_does_not_modify_existed_files(capsys, no_tern_projects):
 def test_find_static_files_from_other_application():
     """Check we can search in templates static files include."""
 
-    project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, static_tag_app)
+    project = tern_django.analyze_templates(static_tag_app)
     assert project == {'libs': [], 'loadEagerly': [independent_app_js]}
 
 
 def test_find_static_predefined_libraries():
     """Check we can detect predefined libraries in templates files."""
 
-    project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, use_jquery_app)
+    project = tern_django.analyze_templates(use_jquery_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
 
 def test_skip_inline_script_tags():
     """Ignore inline html script tags."""
 
-    project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, bad_src_app)
+    project = tern_django.analyze_templates(bad_src_app)
     assert project == {'libs': [], 'loadEagerly': []}
 
 
@@ -205,8 +202,7 @@ def test_needs_to_be_rendered():
 def test_template_rendering():
     """Test we can render any template."""
 
-    project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, rendering_app)
+    project = tern_django.analyze_templates(rendering_app)
     assert project == {'libs': [], 'loadEagerly': [independent_app_js]}
 
 
@@ -214,9 +210,8 @@ def test_template_unicode_processing():
     """Check we can open and render templates written in different languages.
     """
 
-    project = {'libs': [], 'loadEagerly': []}
     # This must pass without UnicodeError exceptions.
-    tern_django.analyze_templates(project, rendering_app)
+    tern_django.analyze_templates(rendering_app)
 
 
 # Sql cache.
@@ -265,19 +260,17 @@ def test_url_cache_table_operations():
 def test_skip_already_analyzed_template():
     """Check we will ignore templates analyzed earlier."""
 
-    project = {'libs': [], 'loadEagerly': []}
     tern_django.set_html_cache(
         cached_app_html, make_timestamp(), '["jquery"]', '')
-    tern_django.analyze_templates(project, cached_app)
+    project = tern_django.analyze_templates(cached_app)
     assert project == {'libs': ['jquery'], 'loadEagerly': []}
 
 
 def test_save_analyzed_template_data():
 
-    project = {'libs': [], 'loadEagerly': []}
     timestamp = make_timestamp(hours=-1)
     tern_django.set_html_cache(cached_app_html, timestamp, '["jquery"]', '')
-    tern_django.analyze_templates(project, cached_app)
+    tern_django.analyze_templates(cached_app)
     _, libs, _ = tern_django.get_html_cache(cached_app_html)
     assert '["underscore"]' == libs
 
@@ -286,8 +279,7 @@ def test_skip_caching_template_on_download_error():
     """We must ignore any template caching if we fail to download
     its libraries."""
 
-    project = {'libs': [], 'loadEagerly': []}
-    tern_django.analyze_templates(project, use_backbone_app)
+    tern_django.analyze_templates(use_backbone_app)
     cached = tern_django.get_html_cache(use_backbone_app_html)
     assert not cached
 
@@ -298,9 +290,8 @@ def test_skip_caching_template_on_download_error():
 def test_download_external_libraries():
     """Check we can download libraries external from internet."""
 
-    project = {'libs': [], 'loadEagerly': []}
     tern_django.urlopen = lambda url: open(backbone_js)
-    tern_django.analyze_templates(project, use_backbone_app)
+    project = tern_django.analyze_templates(use_backbone_app)
     stored_file_path = join(tern_django.storage, backbone_sha256)
     stored_file = open(stored_file_path).read()
     fixture_file = open(backbone_js).read()
