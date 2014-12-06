@@ -29,6 +29,15 @@
 (require 'python)
 (require 'f)
 
+(defgroup tern-django nil
+  "Create tern projects for django applications."
+  :group 'programming)
+
+(defcustom tern-django-debug nil
+  "Run tern_django.py script with debug enabled."
+  :group 'tern-django
+  :type 'boolean)
+
 (defvar tern-django-directory (file-name-directory load-file-name)
   "Directory contain `tern-django' package.")
 
@@ -53,6 +62,14 @@
         (f-join it bin python)
       python)))
 
+(defun tern-django-args ()
+  "Build `tern-django' script options."
+  (let (options)
+    (when tern-django-debug
+      (push "--debug" options))
+    (push tern-django-script options)
+    options))
+
 (defun tern-django-running-p ()
   "Check if `tern-django' process is running."
   (and tern-django-process
@@ -66,10 +83,11 @@
           (get-buffer-create tern-django-buffer)
         (erase-buffer))
       (setq tern-django-process
-            (start-process "tern-django"
-                           tern-django-buffer
-                           (tern-django-python)
-                           tern-django-script))
+            (apply 'start-process
+                   "tern-django"
+                   tern-django-buffer
+                   (tern-django-python)
+                   (tern-django-args)))
       (pop-to-buffer tern-django-buffer))))
 
 (defun tern-django-terminate ()

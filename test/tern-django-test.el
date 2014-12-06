@@ -53,6 +53,14 @@
        (goto-char (point-min))
        (should-not (looking-at-p "Trash content..."))))))
 
+(ert-deftest test-tern-django-respect-debug-option ()
+  "Check that user can specify debug flag for script execution."
+  (should (equal (list tern-django-script)
+                 (tern-django-args)))
+  (should (equal (list tern-django-script "--debug")
+                 (let ((tern-django-debug t))
+                   (tern-django-args)))))
+
 (provide 'tern-django-test)
 
 ;;; tern-django-test.el ends here
