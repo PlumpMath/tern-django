@@ -10,7 +10,7 @@ mkdir -p $project
 
 django-admin.py startproject project $project
 
-for app in independent static_tag bad_src cached use_jquery rendering use_backbone
+for app in independent static_tag bad_src cached use_jquery rendering japanese use_backbone
 do
     mkdir -p $project/$app
     django-admin.py startapp $app $project/$app

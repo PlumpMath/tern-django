@@ -40,6 +40,8 @@ bad_src_app = join(project, 'bad_src')
 
 rendering_app = join(project, 'rendering')
 
+japanese_app = join(project, 'japanese')
+
 use_backbone_app = join(project, 'use_backbone')
 use_backbone_app_html = join(
     use_backbone_app, 'templates', 'use_backbone', 'use_backbone.html')
@@ -206,6 +208,15 @@ def test_template_rendering():
     project = {'libs': [], 'loadEagerly': []}
     tern_django.analyze_templates(project, rendering_app)
     assert project == {'libs': [], 'loadEagerly': [independent_app_js]}
+
+
+def test_template_unicode_processing():
+    """Check we can open and render templates written in different languages.
+    """
+
+    project = {'libs': [], 'loadEagerly': []}
+    # This must pass without UnicodeError exceptions.
+    tern_django.analyze_templates(project, rendering_app)
 
 
 # Sql cache.

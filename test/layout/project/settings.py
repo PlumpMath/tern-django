@@ -1,4 +1,5 @@
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = 'nivi&&(53r3-gn=3-b!h%5ka^5z%r=@0f0yz+=v5a4nt*lk)5='
@@ -23,6 +24,7 @@ INSTALLED_APPS = (
     'use_jquery',
     'bad_src',
     'rendering',
+    'japanese',
 )
 
 MIDDLEWARE_CLASSES = (

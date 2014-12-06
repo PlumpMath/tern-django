@@ -149,7 +149,7 @@ def process_html_template(project, html, app):
     if cached:
         libs, load_eagerly = cached
     else:
-        with open(html) as template:
+        with open(html, 'rb') as template:
             source = template.read().decode(settings.FILE_CHARSET)
         if meaningful_template(source):
             try:
