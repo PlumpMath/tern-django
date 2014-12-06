@@ -54,6 +54,24 @@ environment and run ``tern_django.py`` script.
     export PYTHONPATH=/path/to/project
     tern_django.py
 
+Contributing
+============
+
+Attach ``tern_django.py`` output with debug option enable to any bag
+report.  You can customize ``tern-django-debug`` variable within
+Emacs.  Or directly run script with ``--debug`` option.
+
+Known issues
+============
+
+If script randomly fails with following message:
+::
+
+    OperationalError: database is locked
+
+Check that your ``sqlite`` installation was compiled with
+``HAVE_USLEEP`` flag enabled.
+
 .. _Tern: http://ternjs.net
 .. _Django: https://www.djangoproject.com
 .. _Melpa: http://melpa.org
