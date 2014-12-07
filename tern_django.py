@@ -122,9 +122,11 @@ def merge_projects(*projects):
     """Merge non empty projects all together."""
 
     non_empty = list(filter(None, projects))  # We need list to reuse it.
-    keys = {k for project in non_empty for k in project}
-    return {k: list({v for project in non_empty for v in project[k]})
-            for k in keys}
+    keys = set((k for project in non_empty for k in project))
+    return dict(((k, list(set((v
+                               for project in non_empty
+                               for v in project[k]))))
+                 for k in keys))
 
 
 def save_tern_project(tern_project, project_file):
