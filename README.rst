@@ -1,3 +1,4 @@
+
 .. |travis| image:: https://travis-ci.org/proofit404/tern-django.png
     :target: https://travis-ci.org/proofit404/tern-django
     :alt: Build Status
