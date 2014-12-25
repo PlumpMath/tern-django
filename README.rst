@@ -7,9 +7,13 @@
     :target: https://coveralls.io/r/proofit404/tern-django
     :alt: Coverage Status
 
-================================
-Tern Django |travis| |coveralls|
-================================
+.. |requires| image:: https://requires.io/github/proofit404/tern-django/requirements.svg
+    :target: https://requires.io/github/proofit404/tern-django/requirements
+    :alt: Requirements Status
+
+===========================================
+Tern Django |travis| |coveralls| |requires|
+===========================================
 
 Create Tern_ projects for Django_ applications.
 
