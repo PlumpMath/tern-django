@@ -11,9 +11,19 @@
     :target: https://requires.io/github/proofit404/tern-django/requirements
     :alt: Requirements Status
 
-===========================================
-Tern Django |travis| |coveralls| |requires|
-===========================================
+.. |melpa| image:: http://melpa.org/packages/tern-django-badge.svg
+    :target: http://melpa.org/#/tern-django
+    :alt: Melpa
+
+.. |melpa-stable| image:: http://stable.melpa.org/packages/tern-django-badge.svg
+    :target: http://stable.melpa.org/#/tern-django
+    :alt: Melpa Stable
+
+===========
+Tern Django
+===========
+
+|travis| |coveralls| |requires| |melpa| |melpa-stable|
 
 Create Tern_ projects for Django_ applications.
 
