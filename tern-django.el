@@ -1,8 +1,8 @@
 ;;; tern-django.el --- Create tern projects for django applications.
 
-;; Copyright (C) 2014-2015 by Malyshev Artem
+;; Copyright (C) 2014-2015 by Artem Malyshev
 
-;; Author: Malyshev Artem <proofit404@gmail.com>
+;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/tern-django
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "24") (tern "0.0.1") (f "0.17.1"))
