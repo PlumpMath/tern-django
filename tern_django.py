@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+"""
+    tern_django
+    ~~~~~~~~~~~
+
+    This is tern project generator for django apps.
+
+    :copyright: (c) 2014-2015 by Artem Malyshev.
+    :license: GPL3, see LICENSE for more details.
+"""
+
 import logging
 import multiprocessing
 import re
