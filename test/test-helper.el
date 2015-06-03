@@ -10,7 +10,7 @@
   (cask-initialize root-directory)
   (add-to-list 'load-path root-directory))
 
-(undercover "tern-django.el" (:report-file "emacs-coveralls.json" :send-report nil))
+(undercover "tern-django.el" (:report-file "emacs-coveralls.json") (:send-report nil))
 
 (provide 'test-helper)
 
