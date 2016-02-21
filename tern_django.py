@@ -6,7 +6,7 @@
 
     This is tern project generator for django apps.
 
-    :copyright: (c) 2014-2015 by Artem Malyshev.
+    :copyright: (c) 2014-2016 by Artem Malyshev.
     :license: GPL3, see LICENSE for more details.
 """
 
