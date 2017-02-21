@@ -12,6 +12,4 @@
 
 (undercover "tern-django.el" (:report-file "emacs-coveralls.json") (:send-report nil))
 
-(provide 'test-helper)
-
 ;;; test-helper.el ends here
